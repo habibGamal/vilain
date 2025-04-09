@@ -1,0 +1,75 @@
+import { Button } from "@/Components/ui/button";
+import { EmptyState } from "@/Components/ui/empty-state";
+import { CartHeader } from "@/Components/cart/CartHeader";
+import { CartItemList } from "@/Components/cart/CartItemList";
+import { OrderSummary } from "@/Components/cart/OrderSummary";
+import { useLanguage } from "@/Contexts/LanguageContext";
+import useCart from "@/Hooks/useCart";
+import { App } from "@/types";
+import { Head, router } from "@inertiajs/react";
+import { ShoppingBag } from "lucide-react";
+
+interface CartIndexProps extends App.Interfaces.AppPageProps {
+    cart: App.Models.Cart;
+    cartSummary: App.Models.CartSummary;
+}
+
+export default function Index({ auth, cart, cartSummary }: CartIndexProps) {
+    const { t } = useLanguage();
+    const {
+        isLoading,
+        updateCartItemQuantity,
+        removeCartItem,
+        clearCart,
+        calculateItemTotal,
+    } = useCart();
+
+    return (
+        <>
+            <Head title={t("cart", "Shopping Cart")} />
+
+            <div className="flex flex-col gap-8">
+                <CartHeader totalItems={cartSummary.totalItems} />
+
+                {/* Empty cart state */}
+                {(!cart.items || cart.items.length === 0) && (
+                    <EmptyState
+                        icon={ShoppingBag}
+                        iconSize={36}
+                        iconClassName="text-muted-foreground"
+                        title={t("your_cart_is_empty", "Your cart is empty")}
+                        description={t(
+                            "add_items_to_cart",
+                            "Add items to your cart to see them here"
+                        )}
+                        action={
+                            <Button
+                                onClick={() =>
+                                    router.visit(route("home"))
+                                }
+                            >
+                                {t("continue_shopping", "Continue Shopping")}
+                            </Button>
+                        }
+                        className="py-16"
+                    />
+                )}
+
+                {/* Cart with items */}
+                {cart.items && cart.items.length > 0 && (
+                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                        <CartItemList
+                            items={cart.items}
+                            isLoading={isLoading}
+                            updateCartItemQuantity={updateCartItemQuantity}
+                            removeCartItem={removeCartItem}
+                            calculateItemTotal={calculateItemTotal}
+                            clearCart={clearCart}
+                        />
+                        <OrderSummary cartSummary={cartSummary} />
+                    </div>
+                )}
+            </div>
+        </>
+    );
+}
