@@ -5,6 +5,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,6 +26,10 @@ Route::get('/brands/{brand}', [BrandController::class, 'show'])->name('brands.sh
 // Category routes
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+
+// Search routes
+Route::get('/search', [SearchController::class, 'results'])->name('search.results');
+Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
 Route::get('/notify', function () {
     $subscriptions = User::all();
@@ -56,6 +62,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart/{id}', [CartController::class, 'removeItem'])->name('cart.remove');
     Route::delete('/cart', [CartController::class, 'clearCart'])->name('cart.clear');
     Route::get('/cart/summary', [CartController::class, 'getSummary'])->name('cart.summary');
+
+    // Wishlist routes
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/add', [WishlistController::class, 'addItem'])->name('wishlist.add');
+    Route::delete('/wishlist/remove', [WishlistController::class, 'removeItem'])->name('wishlist.remove');
+    Route::delete('/wishlist', [WishlistController::class, 'clearList'])->name('wishlist.clear');
+    Route::get('/wishlist/summary', [WishlistController::class, 'getSummary'])->name('wishlist.summary');
 });
 
 require __DIR__.'/auth.php';

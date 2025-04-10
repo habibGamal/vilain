@@ -1,78 +1,32 @@
-import React from "react";
-import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import React, { ReactNode } from 'react';
 
 interface EmptyStateProps {
-  /**
-   * Icon to display in the empty state
-   */
-  icon?: LucideIcon;
-  /**
-   * Main title text to display
-   */
-  title?: string;
-  /**
-   * Optional description text
-   */
+  icon?: ReactNode;
+  title: string;
   description?: string;
-  /**
-   * Optional action component (like a button)
-   */
-  action?: React.ReactNode;
-  /**
-   * Optional custom className
-   */
-  className?: string;
-  /**
-   * Optional override for icon size
-   */
-  iconSize?: number;
-  /**
-   * Optional override for icon class name
-   */
-  iconClassName?: string;
+  action?: ReactNode;
 }
 
-export function EmptyState({
-  icon: Icon,
+const EmptyState: React.FC<EmptyStateProps> = ({
+  icon,
   title,
   description,
-  action,
-  className,
-  iconSize = 24,
-  iconClassName,
-}: EmptyStateProps) {
-  const { t } = useLanguage();
-
+  action
+}) => {
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center py-6 text-center",
-      className
-    )}>
-      {Icon && (
-        <div className="mb-4">
-          <Icon
-            className={cn("text-muted-foreground", iconClassName)}
-            size={iconSize}
-            aria-hidden="true"
-          />
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center bg-muted/30 rounded-lg">
+      {icon && (
+        <div className="text-muted-foreground mb-4">
+          {icon}
         </div>
       )}
-
-      {title && (
-        <h3 className="text-sm font-medium text-muted-foreground">
-          {title}
-        </h3>
-      )}
-
+      <h3 className="text-xl font-medium mb-2">{title}</h3>
       {description && (
-        <p className="mt-1 text-xs text-muted-foreground">
-          {description}
-        </p>
+        <p className="text-muted-foreground mb-6 max-w-md">{description}</p>
       )}
-
-      {action && <div className="mt-4">{action}</div>}
+      {action && <div>{action}</div>}
     </div>
   );
-}
+};
+
+export default EmptyState;

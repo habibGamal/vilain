@@ -20,7 +20,7 @@ export function CartItem({
     removeCartItem,
     calculateItemTotal,
 }: CartItemProps) {
-    const { t } = useLanguage();
+    const { t ,getLocalizedField } = useLanguage();
 
     return (
         <Card className="overflow-hidden">
@@ -40,7 +40,7 @@ export function CartItem({
                     <div className="flex-grow space-y-3 sm:space-y-4 w-full">
                         <div className="flex justify-between items-start gap-2">
                             <h4 className="font-medium line-clamp-2 text-sm sm:text-base">
-                                {item.product.name_en}
+                                {getLocalizedField(item.product, 'name')}
                             </h4>
 
                             <div className="flex items-center ml-1">

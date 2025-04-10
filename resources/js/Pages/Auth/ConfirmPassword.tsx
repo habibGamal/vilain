@@ -22,7 +22,7 @@ export default function ConfirmPassword() {
     };
 
     return (
-        <MainLayout>
+        <>
             <Head title={t('confirm_password', 'Confirm Password')} />
 
             <div className="mx-auto max-w-md space-y-6 py-8">
@@ -58,6 +58,6 @@ export default function ConfirmPassword() {
                     </div>
                 </form>
             </div>
-        </MainLayout>
+        </>
     );
 }

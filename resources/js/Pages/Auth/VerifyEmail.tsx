@@ -16,7 +16,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
     };
 
     return (
-        <MainLayout>
+        <>
             <Head title={t('verify_email', 'Email Verification')} />
 
             <div className="mx-auto max-w-md space-y-6 py-8">
@@ -67,6 +67,6 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     </Button>
                 </form>
             </div>
-        </MainLayout>
+        </>
     );
 }

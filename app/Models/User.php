@@ -62,4 +62,12 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasOne(Cart::class);
     }
+
+    /**
+     * Get the wishlist items associated with the user.
+     */
+    public function wishlistItems()
+    {
+        return $this->hasMany(WishlistItem::class);
+    }
 }

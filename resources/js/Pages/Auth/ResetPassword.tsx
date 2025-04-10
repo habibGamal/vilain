@@ -29,7 +29,7 @@ export default function ResetPassword({ token, email }: { token: string, email: 
     };
 
     return (
-        <MainLayout>
+        <>
             <Head title={t('reset_password', 'Reset Password')} />
 
             <div className="mx-auto max-w-md space-y-6 py-8">
@@ -98,6 +98,6 @@ export default function ResetPassword({ token, email }: { token: string, email: 
                     </div>
                 </form>
             </div>
-        </MainLayout>
+        </>
     );
 }

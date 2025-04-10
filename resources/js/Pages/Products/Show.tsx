@@ -9,7 +9,6 @@ import ProductDimensions from "@/Components/Products/ProductDimensions";
 import ProductTabs from "@/Components/Products/ProductTabs";
 import ProductGrid from "@/Components/ProductGrid";
 import ProductDescription from "@/Components/Products/ProductDescription";
-import { App } from "@/types";
 
 interface ShowProps {
     product: App.Models.Product;
@@ -21,9 +20,7 @@ export default function Show({ product, relatedProducts }: ShowProps) {
     const [quantity, setQuantity] = useState(1);
 
     // Extract images from the product
-    const productImages = [product.image, ...(product.gallery || [])].filter(
-        Boolean
-    ) as string[];
+    const productImages = [product.image];
 
     // If no images, add a placeholder
     if (productImages.length === 0) {
@@ -39,7 +36,7 @@ export default function Show({ product, relatedProducts }: ShowProps) {
                 <div>
                     <ProductImageGallery
                         images={productImages}
-                        productName={getLocalizedField(product, "name")}
+                        productName={getLocalizedField(product, "name")!}
                     />
                 </div>
 

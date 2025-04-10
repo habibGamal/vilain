@@ -47,11 +47,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center flex-wrap gap-2 mt-auto pt-2">
             {product.sale_price ? (
               <>
-                <span className="font-bold">{Number(product.sale_price).toFixed(2)} $</span>
+                <span className="font-bold">{Number(product.sale_price).toFixed(2)} EGP</span>
                 <span className="text-muted-foreground text-sm line-through">{Number(product.price).toFixed(2)} $</span>
               </>
             ) : (
-              <span className="font-bold">{Number(product.price).toFixed(2)} $</span>
+              <span className="font-bold">{Number(product.price).toFixed(2)} EGP</span>
             )}
           </div>
         </CardContent>

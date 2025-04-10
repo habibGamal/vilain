@@ -33,10 +33,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 {product.sale_price ? (
                     <>
                         <span className="text-2xl md:text-3xl font-bold">
-                            {product.sale_price} $
+                            {product.sale_price} EGP
                         </span>
                         <span className="text-xl text-muted-foreground line-through">
-                            {product.price} $
+                            {product.price} EGP
                         </span>
                         <Badge variant="destructive" className="ml-2">
                             {Math.round(
@@ -49,7 +49,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     </>
                 ) : (
                     <span className="text-2xl md:text-3xl font-bold">
-                        {product.price} $
+                        {product.price} EGP
                     </span>
                 )}
             </div>

@@ -17,7 +17,7 @@ export function OrderSummary({ cartSummary }: OrderSummaryProps) {
         <div className="space-y-4">
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t('subtotal', 'Subtotal')}</span>
-            <span>${cartSummary.totalPrice.toFixed(2)}</span>
+            <span>EGP {cartSummary.totalPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t('shipping', 'Shipping')}</span>
@@ -25,7 +25,7 @@ export function OrderSummary({ cartSummary }: OrderSummaryProps) {
           </div>
           <div className="border-t pt-4 flex justify-between font-semibold">
             <span>{t('total', 'Total')}</span>
-            <span>${cartSummary.totalPrice.toFixed(2)}</span>
+            <span>EGP {cartSummary.totalPrice.toFixed(2)}</span>
           </div>
           <Button className="w-full" size="lg">
             {t('proceed_to_checkout', 'Proceed to Checkout')}
