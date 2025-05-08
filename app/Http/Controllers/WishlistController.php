@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Services\WishlistService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -49,24 +50,20 @@ class WishlistController extends Controller
             $validated['product_id']
         );
 
-        return response()->back();
+        return redirect()->back();
     }
 
     /**
      * Remove an item from the wishlist.
      */
-    public function removeItem(Request $request)
+    public function removeItem(Request $request, Product $product)
     {
-        $validated = $request->validate([
-            'product_id' => 'required|integer',
-        ]);
-
-        $success = $this->wishlistService->removeItem(
+        $this->wishlistService->removeItem(
             auth()->user(),
-            $validated['product_id']
+            $product->id
         );
 
-        return response()->back();
+        return redirect()->back();
     }
 
     /**
@@ -76,6 +73,6 @@ class WishlistController extends Controller
     {
         $success = $this->wishlistService->clearList(auth()->user());
 
-        return response()->back();
+        return redirect()->back();
     }
 }

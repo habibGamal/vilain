@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\CartService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,7 +37,28 @@ class HandleInertiaRequests extends Middleware
             ],
             'categories' => $this->getTopCategories(),
             'brands' => $this->getTopBrands(),
+            'cartInfo' => $this->getCartInfo($request),
         ];
+    }
+
+    /**
+     * Get cart information if user is authenticated
+     */
+    private function getCartInfo(Request $request): array
+    {
+        $cartInfo = [
+            'itemsCount' => 0,
+            'totalPrice' => 0,
+        ];
+
+        if ($request->user()) {
+            $cartService = app(CartService::class);
+            $cartSummary = $cartService->getCartSummary();
+            $cartInfo['itemsCount'] = $cartSummary['totalItems'];
+            $cartInfo['totalPrice'] = $cartSummary['totalPrice'];
+        }
+
+        return $cartInfo;
     }
 
     /**

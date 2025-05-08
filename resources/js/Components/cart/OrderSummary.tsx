@@ -2,6 +2,7 @@ import { Button } from "@/Components/ui/button";
 import { Card } from "@/Components/ui/card";
 import { useLanguage } from "@/Contexts/LanguageContext";
 import { App } from "@/types";
+import { router } from "@inertiajs/react";
 
 interface OrderSummaryProps {
   cartSummary: App.Models.CartSummary;
@@ -27,7 +28,7 @@ export function OrderSummary({ cartSummary }: OrderSummaryProps) {
             <span>{t('total', 'Total')}</span>
             <span>EGP {cartSummary.totalPrice.toFixed(2)}</span>
           </div>
-          <Button className="w-full" size="lg">
+          <Button onClick={()=>router.get(route('checkout.index'))} className="w-full" size="lg">
             {t('proceed_to_checkout', 'Proceed to Checkout')}
           </Button>
         </div>

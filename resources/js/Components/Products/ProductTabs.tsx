@@ -1,10 +1,7 @@
-import { useState } from "react";
-import { useLanguage } from "@/Contexts/LanguageContext";
-import { App } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
-import { File, PackageOpen, Star } from "lucide-react";
-import { EmptyState } from "@/Components/ui/empty-state";
-import ProductDimensions from "./ProductDimensions";
+import { useLanguage } from "@/Contexts/LanguageContext";
+import { Star } from "lucide-react";
+import EmptyState from "../ui/empty-state";
 
 interface ProductTabsProps {
     product: App.Models.Product;
@@ -25,7 +22,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
             </TabsList>
 
             <TabsContent value="specifications" className="py-4">
-                <ProductDimensions product={product} />
+                Specs
             </TabsContent>
 
             <TabsContent value="reviews" className="py-4">
@@ -66,13 +63,12 @@ export default function ProductTabs({ product }: ProductTabsProps) {
                     </div>
                 ) : (
                     <EmptyState
-                        icon={Star}
+                        icon={<Star className="text-yellow-400" />}
                         title={t("no_reviews", "No reviews available")}
                         description={t(
                             "be_first_to_review",
                             "Be the first to review this product!"
                         )}
-                        iconClassName="text-yellow-400"
                     />
                 )}
             </TabsContent>

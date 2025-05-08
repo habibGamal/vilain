@@ -13,8 +13,8 @@ import { router } from "@inertiajs/react";
 interface SortSelectorProps {
   sortBy: string;
   query: string;
-  selectedBrands: number[];
-  selectedCategories: number[];
+  selectedBrands: string[];
+  selectedCategories: string[];
   minPrice: number | null;
   maxPrice: number | null;
 }

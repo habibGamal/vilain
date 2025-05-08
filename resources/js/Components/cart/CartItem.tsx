@@ -2,8 +2,9 @@ import { Button } from "@/Components/ui/button";
 import { Card } from "@/Components/ui/card";
 import { Image } from "@/Components/ui/Image";
 import { useLanguage } from "@/Contexts/LanguageContext";
-import { App } from "@/types";
 import { Trash2, MinusCircle, PlusCircle } from "lucide-react";
+import { Badge } from "@/Components/ui/badge";
+import { App } from "@/types";
 
 interface CartItemProps {
     item: App.Models.CartItem;
@@ -29,7 +30,7 @@ export function CartItem({
                     {/* Product Image */}
                     <div className="h-14 w-14 sm:h-24 sm:w-24 rounded-md overflow-hidden bg-muted flex-shrink-0">
                         <Image
-                            src={item.product.image}
+                            src={item.variant?.featured_image || item.product.featured_image || "/placeholder.svg"}
                             alt={item.product.name_en}
                             className="h-full w-full object-cover"
                             fallbackSrc="/placeholder.svg"
@@ -39,9 +40,32 @@ export function CartItem({
                     {/* Product Details */}
                     <div className="flex-grow space-y-3 sm:space-y-4 w-full">
                         <div className="flex justify-between items-start gap-2">
-                            <h4 className="font-medium line-clamp-2 text-sm sm:text-base">
-                                {getLocalizedField(item.product, 'name')}
-                            </h4>
+                            <div>
+                                <h4 className="font-medium line-clamp-2 text-sm sm:text-base">
+                                    {getLocalizedField(item.product, 'name')}
+                                </h4>
+
+                                {/* Variant Details */}
+                                {item.variant && (
+                                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                        {item.variant.color && (
+                                            <Badge variant="outline" className="px-2 py-0 h-5 text-xs">
+                                                {t("color", "Color")}: {item.variant.color}
+                                            </Badge>
+                                        )}
+                                        {item.variant.size && (
+                                            <Badge variant="outline" className="px-2 py-0 h-5 text-xs">
+                                                {t("size", "Size")}: {item.variant.size}
+                                            </Badge>
+                                        )}
+                                        {item.variant.capacity && (
+                                            <Badge variant="outline" className="px-2 py-0 h-5 text-xs">
+                                                {t("capacity", "Capacity")}: {item.variant.capacity}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="flex items-center ml-1">
                                 <Button
@@ -65,23 +89,24 @@ export function CartItem({
                                         {t("price", "Price")}
                                     </div>
                                     <div className="flex flex-col">
-                                        {item.product.sale_price && (
+                                        {/* Show variant price if available, otherwise product price */}
+                                        {(item.variant?.sale_price || item.product.sale_price) && (
                                             <span className="text-primary font-medium text-sm">
                                                 $
                                                 {Number(
-                                                    item.product.sale_price
+                                                    item.variant?.sale_price || item.product.sale_price
                                                 ).toFixed(2)}
                                             </span>
                                         )}
                                         <span
                                             className={
-                                                item.product.sale_price
+                                                (item.variant?.sale_price || item.product.sale_price)
                                                     ? "text-xs line-through text-muted-foreground"
                                                     : "text-primary font-medium text-sm"
                                             }
                                         >
                                             $
-                                            {Number(item.product.price).toFixed(
+                                            {Number(item.variant?.price || item.product.price).toFixed(
                                                 2
                                             )}
                                         </span>
@@ -151,22 +176,22 @@ export function CartItem({
                                     {t("price", "Price")}
                                 </div>
                                 <div className="flex flex-col">
-                                    {item.product.sale_price && (
+                                    {(item.variant?.sale_price || item.product.sale_price) && (
                                         <span className="text-primary font-medium">
                                             $
                                             {Number(
-                                                item.product.sale_price
+                                                item.variant?.sale_price || item.product.sale_price
                                             ).toFixed(2)}
                                         </span>
                                     )}
                                     <span
                                         className={
-                                            item.product.sale_price
+                                            (item.variant?.sale_price || item.product.sale_price)
                                                 ? "text-xs line-through text-muted-foreground"
                                                 : "text-primary font-medium"
                                         }
                                     >
-                                        ${Number(item.product.price).toFixed(2)}
+                                        ${Number(item.variant?.price || item.product.price).toFixed(2)}
                                     </span>
                                 </div>
                             </div>

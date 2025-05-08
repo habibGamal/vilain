@@ -33,16 +33,23 @@ class CartService
      *
      * @param int $productId
      * @param int $quantity
+     * @param int|null $variantId
      * @return CartItem
      * @throws ModelNotFoundException
      */
-    public function addToCart(int $productId, int $quantity = 1): CartItem
+    public function addToCart(int $productId, int $quantity = 1, ?int $variantId = null): CartItem
     {
         $product = Product::findOrFail($productId);
         $cart = $this->getOrCreateCart();
-
-        // Check if product already exists in cart
-        $cartItem = $cart->items()->where('product_id', $productId)->first();
+        $variantId = $variantId ? $variantId: $product->defaultVariant()->id;
+        // Check if product and variant combination already exists in cart
+        $query = $cart->items()->where('product_id', $productId);
+        if ($variantId) {
+            $query->where('product_variant_id', $variantId);
+        } else {
+            $query->whereNull('product_variant_id');
+        }
+        $cartItem = $query->first();
 
         if ($cartItem) {
             // Update quantity if product already exists in cart
@@ -52,6 +59,7 @@ class CartService
             // Create new cart item if product doesn't exist in cart
             $cartItem = $cart->items()->create([
                 'product_id' => $productId,
+                'product_variant_id' => $variantId,
                 'quantity' => $quantity
             ]);
         }
@@ -120,8 +128,8 @@ class CartService
     {
         $cart = $this->getOrCreateCart();
 
-        // Eager load the items with their products for better performance
-        return $cart->load(['items.product']);
+        // Eager load the items with their products and variants for better performance
+        return $cart->load(['items.product', 'items.variant']);
     }
 
     /**

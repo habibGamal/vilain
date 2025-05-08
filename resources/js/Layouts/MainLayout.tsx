@@ -1,3 +1,7 @@
+import ApplicationLogo from "@/Components/ApplicationLogo";
+import SearchBar from "@/Components/SearchBar";
+import { useLanguage } from "@/Contexts/LanguageContext";
+import { Link, router, usePage } from "@inertiajs/react";
 import {
     PropsWithChildren,
     ReactNode,
@@ -5,31 +9,25 @@ import {
     useRef,
     useState,
 } from "react";
-import { Link, router, usePage } from "@inertiajs/react";
-import ApplicationLogo from "@/Components/ApplicationLogo";
-import { useLanguage } from "@/Contexts/LanguageContext";
-import { cn } from "@/lib/utils";
-import SearchBar from "@/Components/SearchBar";
 
 // Import our custom components
 import DesktopNav from "@/Components/DesktopNav";
+import MobileBottomNav from "@/Components/MobileBottomNav";
 import MobileNav from "@/Components/MobileNav";
 import UserActions from "@/Components/UserActions";
-import MobileBottomNav from "@/Components/MobileBottomNav";
 import { App } from "@/types";
 
 export default function MainLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { auth, categories, brands } =
+    const { auth, categories, brands ,cartInfo: cart} =
         usePage<App.Interfaces.AppPageProps>().props;
     const { direction, t, getLocalizedField } = useLanguage();
     const user = auth?.user;
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [cartItemsCount] = useState(0); // This would be replaced with actual cart data from backend
-
+    const cartItemsCount = cart.itemsCount; // This would be replaced with actual cart data from backend
     const handleSearchClick = () => {
         setIsSearchOpen(!isSearchOpen);
     };
@@ -116,7 +114,7 @@ export default function MainLayout({
                 </header>
             )}
 
-            <main className="container flex-1 px-4 py-8 pb-16 lg:pb-8">
+            <main className="container flex-1 px-4 py-4 pb-16 lg:pb-8">
                 <div ref={section} className="">
                     {children}
                 </div>

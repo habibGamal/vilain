@@ -1,28 +1,60 @@
 import { Button } from "@/Components/ui/button";
 import { useLanguage } from "@/Contexts/LanguageContext";
-import useCart from "@/Hooks/useCart";
+import useCart from "@/hooks/use-cart";
 import { App } from "@/types";
+import { router } from "@inertiajs/react";
 import { Heart, ShoppingBag } from "lucide-react";
 
 interface ProductActionsProps {
     product: App.Models.Product;
     quantity: number;
+    selectedVariant?: App.Models.ProductVariant;
 }
 
 export default function ProductActions({
     product,
     quantity,
+    selectedVariant,
 }: ProductActionsProps) {
     const { t } = useLanguage();
     const { addToCart, addingToCart } = useCart();
 
     const handleAddToCart = () => {
-        if (product.quantity > 0) {
+        if (selectedVariant) {
+            if (selectedVariant.quantity > 0) {
+                // Add with variant ID
+                addToCart(product.id, quantity, selectedVariant.id);
+            }
+        } else if (product.total_quantity > 0) {
+            // Legacy fallback for products without variants
             addToCart(product.id, quantity);
         }
     };
 
-    const isOutOfStock = product.quantity <= 0;
+    const isOutOfStock = selectedVariant
+        ? selectedVariant.quantity <= 0
+        : (product.total_quantity <= 0);
+
+    const isInWishlist = product.isInWishlist;
+
+    const addToWishlist = () => {
+        router.post(
+            route("wishlist.add"),
+            { product_id: product.id },
+            {
+                preserveScroll: true,
+            }
+        );
+    };
+
+    const removeFromWishlist = () => {
+        router.delete(
+            route("wishlist.remove", product.id),
+            {
+                preserveScroll: true,
+            }
+        );
+    };
 
     return (
         <div className="flex gap-3 flex-row">
@@ -40,8 +72,19 @@ export default function ProductActions({
                     : t("add_to_cart", "Add to Cart")}
             </Button>
 
-            <Button variant="outline" size="lg" className="flex-shrink-0">
-                <Heart className="w-5 h-5" />
+            <Button
+                variant="outline"
+                size="lg"
+                className="flex-shrink-0"
+                onClick={
+                    isInWishlist ? removeFromWishlist : addToWishlist
+                }
+            >
+                <Heart
+                    className="w-5 h-5"
+                    fill={isInWishlist ? "red" : "none"}
+                    stroke={isInWishlist ? "red" : "currentColor"}
+                />
                 <span className="sr-only">
                     {t("add_to_wishlist", "Add to Wishlist")}
                 </span>

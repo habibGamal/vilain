@@ -5,8 +5,8 @@ import { FolderX, Menu, ShoppingBag } from "lucide-react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
 import { useLanguage } from "@/Contexts/LanguageContext";
 import LanguageSwitcher from "@/Components/LanguageSwitcher";
-import { EmptyState } from "@/Components/ui/empty-state";
 import { App } from "@/types";
+import EmptyState from "./ui/empty-state";
 
 interface MobileNavProps {
     brands: App.Models.Brand[];
@@ -61,7 +61,7 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
                                     {brands.map((brand) => (
                                         <Link
                                             key={brand.id}
-                                            href={`/brands/${brand.slug}`}
+                                            href={`/search?brands[]=${brand.id}`}
                                             className="text-sm hover:text-primary"
                                         >
                                             {getLocalizedField(brand, "name")}
@@ -71,12 +71,11 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
                             ) : (
                                 <div className="ltr:ml-4 rtl:mr-4">
                                     <EmptyState
-                                        icon={ShoppingBag}
+                                        icon={<ShoppingBag size={24} />}
                                         title={t(
                                             "no_brands_available",
                                             "No brands available"
                                         )}
-                                        iconSize={24}
                                     />
                                 </div>
                             )}
@@ -92,7 +91,7 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
                                     {categories.map((category) => (
                                         <Link
                                             key={category.id}
-                                            href={`/categories/${category.slug}`}
+                                            href={`/search?categories[]=${category.id}`}
                                             className="text-sm hover:text-primary"
                                         >
                                             {getLocalizedField(
@@ -105,12 +104,11 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
                             ) : (
                                 <div className="ltr:ml-4 rtl:mr-4">
                                     <EmptyState
-                                        icon={FolderX}
+                                        icon={<FolderX size={24} />}
                                         title={t(
                                             "no_categories_available",
                                             "No categories available"
                                         )}
-                                        iconSize={24}
                                     />
                                 </div>
                             )}

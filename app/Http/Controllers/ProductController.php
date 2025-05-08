@@ -13,7 +13,9 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'brand'])
+        $query = Product::with(['category', 'brand', 'variants' => function($query) {
+            $query->where('is_active', true);
+        }])
             ->where('is_active', true);
 
         // Apply filters if provided
@@ -40,14 +42,28 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category', 'brand']);
+        $product->load(['category', 'brand', 'variants' => function($query) {
+            $query->where('is_active', true);
+        }])
+            ->append([
+                'isInWishlist',
+                'featuredImage',
+                'allImages',
+                'totalQuantity',
+                'isInStock',
+            ]);
 
         // Get related products from the same category with pagination
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
-            ->with(['brand' => function ($query) {
-                $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
-            }])
+            ->with([
+                'brand' => function ($query) {
+                    $query->select('id', 'name_en', 'name_ar', 'slug');
+                },
+                'variants' => function($query) {
+                    $query->where('is_active', true);
+                }
+            ])
             ->where('is_active', true)
             ->paginate(4);
 

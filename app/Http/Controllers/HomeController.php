@@ -95,7 +95,7 @@ class HomeController extends Controller
                 'title_ar' => 'مجموعة جديدة',
                 'description_en' => 'Discover our latest products with premium quality and exclusive deals.',
                 'description_ar' => 'اكتشف أحدث منتجاتنا ذات الجودة العالية والعروض الحصرية.',
-                'image' => '/storage/images/hero/slide-1.jpg',
+                'image' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200',
                 'cta_link' => '/products/new-arrivals'
             ],
             [
@@ -104,7 +104,7 @@ class HomeController extends Controller
                 'title_ar' => 'تخفيضات الصيف',
                 'description_en' => 'Up to 50% off on selected items. Limited time offer.',
                 'description_ar' => 'خصم يصل إلى 50٪ على منتجات مختارة. عرض لفترة محدودة.',
-                'image' => '/storage/images/hero/slide-2.jpg',
+                'image' => 'https://images.unsplash.com/photo-1574634534894-89d7576c8259?q=80&w=1200',
                 'cta_link' => '/products/on-sale'
             ]
         ]);

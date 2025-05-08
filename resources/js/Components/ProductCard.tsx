@@ -5,9 +5,8 @@ import {
   CardFooter
 } from '@/Components/ui/card';
 import { useLanguage } from '@/Contexts/LanguageContext';
-import useCart from '@/Hooks/useCart';
+import useCart from '@/hooks/use-cart';
 import { ShoppingBag } from 'lucide-react';
-import { App } from '@/types';
 import { Image } from '@/Components/ui/Image';
 import { Link } from "@inertiajs/react";
 
@@ -25,9 +24,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.id}`} className="flex-1 flex flex-col">
         <div className="aspect-[1/1] relative bg-muted">
           <Image
-            src={product.image}
+            src={product.featured_image || '/placeholder.svg'}
             alt={getLocalizedField(product, 'name')}
-            className="object-cover w-full h-full"
+            className="object-contain w-full h-full aspect-square"
           />
           {product.sale_price && (
             <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded">
@@ -37,8 +36,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <CardContent className="p-4 flex-1">
           {product.brand && (
-            <p className="text-sm text-muted-foreground mb-1">
-              {getLocalizedField(product.brand, 'name')}
+            <p className="text-sm text-muted-foreground mb-1 truncate">
+                {getLocalizedField(product.brand, 'name')}
             </p>
           )}
           <h3 className="font-medium mb-2 line-clamp-2">

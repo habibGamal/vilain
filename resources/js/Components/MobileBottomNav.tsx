@@ -10,7 +10,6 @@ interface MobileBottomNavProps {
 
 export default function MobileBottomNav({ cartItemsCount = 0, onSearchClick }: MobileBottomNavProps) {
   const { t } = useLanguage();
-
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 block border-t border-border bg-background lg:hidden">
       <div className="container flex h-14 items-center justify-between px-4">
@@ -44,7 +43,7 @@ export default function MobileBottomNav({ cartItemsCount = 0, onSearchClick }: M
             <div className="relative">
               <ShoppingCart className="h-5 w-5" />
               {cartItemsCount > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                <span className="absolute ltr:-right-2 rtl:-left-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
                   {cartItemsCount > 9 ? '9+' : cartItemsCount}
                 </span>
               )}

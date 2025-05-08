@@ -1,10 +1,7 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
 import { Badge } from "@/Components/ui/badge";
-import { Check, AlertCircle } from "lucide-react";
-import { Separator } from "@/Components/ui/separator";
-import { App } from "@/types";
-import ProductDescription from "@/Components/Products/ProductDescription";
+import { useLanguage } from "@/Contexts/LanguageContext";
 import { Link } from "@inertiajs/react";
+import { AlertCircle, Check } from "lucide-react";
 
 interface ProductInfoProps {
     product: App.Models.Product;
@@ -12,8 +9,8 @@ interface ProductInfoProps {
 
 export default function ProductInfo({ product }: ProductInfoProps) {
     const { getLocalizedField, t } = useLanguage();
-    const isInStock = product.quantity > 0;
-
+    const isInStock = product.isInStock;
+    console.log(product)
     return (
         <div className="flex flex-col">
             {/* Brand */}
@@ -60,7 +57,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                             {t("category", "Category")}:
                         </span>
                         <Link
-                            href={`/categories/${product.category.id}`}
+                            href={`/search?categories[]=${product.category.id}`}
                             className="text-primary hover:underline"
                         >
                             {getLocalizedField(product.category, "name")}
@@ -82,7 +79,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                         <span className="font-medium">
                             {isInStock
                                 ? `${t("in_stock", "In Stock")} · ${
-                                      product.quantity
+                                      product.totalQuantity
                                   } ${t("available", "available")}`
                                 : t("out_of_stock", "Out of Stock")}
                         </span>

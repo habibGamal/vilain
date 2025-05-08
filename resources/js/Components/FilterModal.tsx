@@ -12,13 +12,119 @@ import {
 import { Button } from "@/Components/ui/button";
 import { Checkbox } from "@/Components/ui/checkbox";
 import { Slider } from "@/Components/ui/slider";
-import { FilterIcon, X, CheckIcon } from "lucide-react";
+import {
+    FilterIcon,
+    X,
+    CheckIcon,
+    ChevronDown,
+    ChevronRight,
+    ChevronLeft,
+} from "lucide-react";
 import { Label } from "@/Components/ui/label";
 import { Badge } from "@/Components/ui/badge";
 import { Separator } from "@/Components/ui/separator";
 import { ScrollArea } from "@/Components/ui/scroll-area";
 import { router } from "@inertiajs/react";
 import { Input } from "./ui/input";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "./ui/collapsible";
+
+// New component for nested categories
+interface CategoryItemProps {
+    category: App.Models.Category;
+    localSelectedCategories: string[];
+    toggleCategory: (id: string) => void;
+    level: number;
+    getName: (item: { name_en: string; name_ar: string }) => string;
+}
+
+const CategoryItem = ({
+    category,
+    localSelectedCategories,
+    toggleCategory,
+    level,
+    getName,
+}: CategoryItemProps) => {
+    const [isOpen, setIsOpen] = useState(true);
+    const hasChildren = category.children && category.children.length > 0;
+    const { direction } = useLanguage();
+    return (
+        <div className="space-y-1">
+            {hasChildren ? (
+                <Collapsible open={isOpen} onOpenChange={setIsOpen} dir={direction}>
+                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                        <div style={{ width: `${level * 12}px` }}></div>
+                        <CollapsibleTrigger className="focus:outline-none">
+                            {isOpen ? (
+                                <ChevronDown className="h-4 w-4" />
+                            ) : (
+                                direction === "rtl" ? (
+                                    <ChevronLeft className="h-4 w-4" />
+                                ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                )
+                            )}
+                        </CollapsibleTrigger>
+                        <Checkbox
+                            id={`category-${category.id}`}
+                            checked={localSelectedCategories.includes(
+                                category.id.toString()
+                            )}
+                            onCheckedChange={() =>
+                                toggleCategory(category.id.toString())
+                            }
+                        />
+                        <Label
+                            htmlFor={`category-${category.id}`}
+                            className="text-sm cursor-pointer"
+                        >
+                            {getName(category)}
+                        </Label>
+                    </div>
+                    <CollapsibleContent>
+                        <div className="space-y-1 ml-4 rtl:ml-0 rtl:mr-4">
+                            {category.children!.map((child) => (
+                                <CategoryItem
+                                    key={child.id}
+                                    category={child}
+                                    localSelectedCategories={
+                                        localSelectedCategories
+                                    }
+                                    toggleCategory={toggleCategory}
+                                    level={level + 1}
+                                    getName={getName}
+                                />
+                            ))}
+                        </div>
+                    </CollapsibleContent>
+                </Collapsible>
+            ) : (
+                <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <div style={{ width: `${level * 12}px` }}></div>
+                    <div className="w-4"></div>
+                    <Checkbox
+                        id={`category-${category.id}`}
+                        checked={localSelectedCategories.includes(
+                            category.id.toString()
+                        )}
+                        onCheckedChange={() =>
+                            toggleCategory(category.id.toString())
+                        }
+                    />
+                    <Label
+                        htmlFor={`category-${category.id}`}
+                        className="text-sm cursor-pointer"
+                    >
+                        {getName(category)}
+                    </Label>
+                </div>
+            )}
+        </div>
+    );
+};
 
 interface FilterModalProps {
     brands: App.Models.Brand[];
@@ -224,28 +330,16 @@ export function FilterModal({
                                 </h3>
                                 <div className="space-y-2">
                                     {categories.map((category) => (
-                                        <div
+                                        <CategoryItem
                                             key={category.id}
-                                            className="flex items-center space-x-2 rtl:space-x-reverse"
-                                        >
-                                            <Checkbox
-                                                id={`category-${category.id}`}
-                                                checked={localSelectedCategories.includes(
-                                                    category.id.toString()
-                                                )}
-                                                onCheckedChange={() =>
-                                                    toggleCategory(
-                                                        category.id.toString()
-                                                    )
-                                                }
-                                            />
-                                            <Label
-                                                htmlFor={`category-${category.id}`}
-                                                className="text-sm cursor-pointer"
-                                            >
-                                                {getName(category)}
-                                            </Label>
-                                        </div>
+                                            category={category}
+                                            localSelectedCategories={
+                                                localSelectedCategories
+                                            }
+                                            toggleCategory={toggleCategory}
+                                            level={0}
+                                            getName={getName}
+                                        />
                                     ))}
                                 </div>
                                 {categories.length === 0 && (
@@ -269,7 +363,10 @@ export function FilterModal({
                             <div className="px-4">
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="space-y-2 w-full">
-                                        <Label htmlFor="min-price" className="text-sm">
+                                        <Label
+                                            htmlFor="min-price"
+                                            className="text-sm"
+                                        >
                                             {t("min_price", "Min Price")}
                                         </Label>
                                         <Input
@@ -277,8 +374,13 @@ export function FilterModal({
                                             type="number"
                                             value={localPriceRange[0]}
                                             onChange={(e) => {
-                                                const value = Number(e.target.value);
-                                                setLocalPriceRange([value, localPriceRange[1]]);
+                                                const value = Number(
+                                                    e.target.value
+                                                );
+                                                setLocalPriceRange([
+                                                    value,
+                                                    localPriceRange[1],
+                                                ]);
                                             }}
                                             className="w-full"
                                         />
@@ -287,7 +389,10 @@ export function FilterModal({
                                         —
                                     </span>
                                     <div className="space-y-2 w-full">
-                                        <Label htmlFor="max-price" className="text-sm">
+                                        <Label
+                                            htmlFor="max-price"
+                                            className="text-sm"
+                                        >
                                             {t("max_price", "Max Price")}
                                         </Label>
                                         <Input
@@ -295,8 +400,13 @@ export function FilterModal({
                                             type="number"
                                             value={localPriceRange[1]}
                                             onChange={(e) => {
-                                                const value = Number(e.target.value);
-                                                setLocalPriceRange([localPriceRange[0], value]);
+                                                const value = Number(
+                                                    e.target.value
+                                                );
+                                                setLocalPriceRange([
+                                                    localPriceRange[0],
+                                                    value,
+                                                ]);
                                             }}
                                             className="w-full"
                                         />
@@ -306,16 +416,25 @@ export function FilterModal({
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => setLocalPriceRange([priceRange.min, priceRange.max])}
+                                        onClick={() =>
+                                            setLocalPriceRange([
+                                                priceRange.min,
+                                                priceRange.max,
+                                            ])
+                                        }
                                         className="text-xs h-8"
                                     >
                                         {t("reset_price", "Reset Price")}
                                     </Button>
                                     <span className="text-xs text-muted-foreground">
-                                        {t("price_range_from_to", "Range: {{min}} - {{max}}", {
-                                            min: priceRange.min,
-                                            max: priceRange.max
-                                        })}
+                                        {t(
+                                            "price_range_from_to",
+                                            "Range: {{min}} - {{max}}",
+                                            {
+                                                min: priceRange.min,
+                                                max: priceRange.max,
+                                            }
+                                        )}
                                     </span>
                                 </div>
                             </div>

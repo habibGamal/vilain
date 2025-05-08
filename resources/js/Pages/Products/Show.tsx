@@ -1,31 +1,35 @@
-import { useState } from "react";
-import { Head } from "@inertiajs/react";
-import { useLanguage } from "@/Contexts/LanguageContext";
-import ProductImageGallery from "@/Components/Products/ProductImageGallery";
+import ProductGrid from "@/Components/ProductGrid";
+import ProductActions from "@/Components/Products/ProductActions";
+import ProductDescription from "@/Components/Products/ProductDescription";
+import ProductGallery from "@/Components/Products/ProductGallery";
 import ProductInfo from "@/Components/Products/ProductInfo";
 import ProductQuantitySelector from "@/Components/Products/ProductQuantitySelector";
-import ProductActions from "@/Components/Products/ProductActions";
-import ProductDimensions from "@/Components/Products/ProductDimensions";
 import ProductTabs from "@/Components/Products/ProductTabs";
-import ProductGrid from "@/Components/ProductGrid";
-import ProductDescription from "@/Components/Products/ProductDescription";
+import ProductVariantSelector from "@/Components/Products/ProductVariantSelector";
+import { PageTitle } from "@/Components/ui/page-title";
+import { useLanguage } from "@/Contexts/LanguageContext";
+import { App } from "@/types";
+import { Head, Link } from "@inertiajs/react";
+import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { useState } from "react";
 
 interface ShowProps {
     product: App.Models.Product;
     relatedProducts: App.Models.Product[];
 }
 
-export default function Show({ product, relatedProducts }: ShowProps) {
+export default function Show({ product }: ShowProps) {
     const { t, getLocalizedField } = useLanguage();
     const [quantity, setQuantity] = useState(1);
+    const [selectedVariant, setSelectedVariant] = useState<App.Models.ProductVariant | null>(null);
 
-    // Extract images from the product
-    const productImages = [product.image];
-
-    // If no images, add a placeholder
-    if (productImages.length === 0) {
-        productImages.push("/placeholder.svg");
-    }
+    // Get the default variant or the first variant if no default
+    const handleVariantChange = (variant: App.Models.ProductVariant) => {
+        console.log("Selected variant:", variant);
+        setSelectedVariant(variant);
+        // Reset quantity to 1 when variant changes
+        setQuantity(1);
+    };
 
     return (
         <>
@@ -34,9 +38,9 @@ export default function Show({ product, relatedProducts }: ShowProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-4">
                 {/* Left column - Product images */}
                 <div>
-                    <ProductImageGallery
-                        images={productImages}
-                        productName={getLocalizedField(product, "name")!}
+                    <ProductGallery
+                        product={product}
+                        selectedVariant={selectedVariant || undefined}
                     />
                 </div>
 
@@ -44,15 +48,27 @@ export default function Show({ product, relatedProducts }: ShowProps) {
                 <div className="flex flex-col">
                     <ProductInfo product={product} />
 
-                    {product.quantity > 0 && (
+                    {/* Variant selector */}
+                    {product.variants && product.variants.length > 0 && (
+                        <div className="mb-6">
+                            <ProductVariantSelector
+                                product={product}
+                                onVariantChange={handleVariantChange}
+                                selectedVariantId={selectedVariant?.id}
+                            />
+                        </div>
+                    )}
+
+                    {(product.isInStock || (selectedVariant && selectedVariant.quantity > 0)) && (
                         <div className="space-y-6 mb-6">
                             <ProductQuantitySelector
-                                maxQuantity={product.quantity}
+                                maxQuantity={selectedVariant ? selectedVariant.quantity : product.totalQuantity || 1}
                                 onChange={setQuantity}
                             />
                             <ProductActions
                                 product={product}
                                 quantity={quantity}
+                                selectedVariant={selectedVariant || undefined}
                             />
                         </div>
                     )}

@@ -22,20 +22,4 @@ class BrandController extends Controller
             'brands' => $brands
         ]);
     }
-
-    /**
-     * Display the specified brand.
-     */
-    public function show(Brand $brand)
-    {
-        $brand->load(['children', 'products' => function($query) {
-            $query->where('is_active', true)
-                ->orderBy('created_at', 'desc')
-                ->take(12);
-        }]);
-
-        return Inertia::render('Brands/Show', [
-            'brand' => $brand
-        ]);
-    }
 }

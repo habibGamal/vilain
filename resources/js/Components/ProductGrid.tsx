@@ -1,10 +1,10 @@
-import EmptyState from "@/Components/EmptyState";
 import ProductCard from "@/Components/ProductCard";
 import { useLanguage } from "@/Contexts/LanguageContext";
-import { PackageOpen } from "lucide-react";
+import { PackageOpen, ArrowRight, ArrowLeft } from "lucide-react";
 import { Link, WhenVisible, usePage } from "@inertiajs/react";
 import { Skeleton } from "@/Components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import EmptyState from "./ui/empty-state";
 
 interface ProductGridProps {
     title?: string | null;
@@ -27,7 +27,7 @@ export default function ProductGrid({
     dataKey,
     viewType = "scroll", // Default to horizontal scrolling view
 }: ProductGridProps) {
-    const { t } = useLanguage();
+    const { t ,direction } = useLanguage();
     const page = usePage();
 
     // Calculate section-based keys
@@ -62,16 +62,24 @@ export default function ProductGrid({
             {(title || viewAllLink) && (
                 <div className="flex items-center justify-between pb-8">
                     {title && (
-                        <h2 className="text-2xl md:text-3xl font-bold">
-                            {t(title)}
-                        </h2>
+                        <div className="flex items-center gap-2">
+                            <PackageOpen className="h-6 w-6 text-primary" />
+                            <h2 className="text-2xl md:text-3xl font-bold">
+                                {t(title)}
+                            </h2>
+                        </div>
                     )}
                     {viewAllLink && (
                         <Link
                             href={viewAllLink}
-                            className="text-primary hover:underline font-medium"
+                            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors group"
                         >
                             {t("view_all", "View All")}
+                            {direction === 'rtl' ? (
+                                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                            ) : (
+                                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            )}
                         </Link>
                     )}
                 </div>
@@ -120,7 +128,7 @@ export default function ProductGrid({
                 </div>
             ) : (
                 <EmptyState
-                    message={
+                    title={
                         emptyMessage ||
                         t("no_products_available", "No products available")
                     }

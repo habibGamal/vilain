@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cart_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_variant_id')->nullable()
+                ->constrained('product_variants')->nullOnDelete();
             $table->integer('quantity')->default(1);
             $table->timestamps();
 
             // Prevent duplicate products in the same cart
-            $table->unique(['cart_id', 'product_id']);
+            $table->unique(['cart_id', 'product_id', 'product_variant_id'] , 'unique_cart_item');
         });
     }
 

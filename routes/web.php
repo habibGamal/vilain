@@ -7,6 +7,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\KashierPaymentController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,7 +24,6 @@ Route::get('/products/{product}', [ProductController::class, 'show'])->name('pro
 
 // Brand routes
 Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
-Route::get('/brands/{brand}', [BrandController::class, 'show'])->name('brands.show');
 
 // Category routes
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
@@ -66,9 +68,31 @@ Route::middleware('auth')->group(function () {
     // Wishlist routes
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/add', [WishlistController::class, 'addItem'])->name('wishlist.add');
-    Route::delete('/wishlist/remove', [WishlistController::class, 'removeItem'])->name('wishlist.remove');
+    Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'removeItem'])->name('wishlist.remove');
     Route::delete('/wishlist', [WishlistController::class, 'clearList'])->name('wishlist.clear');
     Route::get('/wishlist/summary', [WishlistController::class, 'getSummary'])->name('wishlist.summary');
+
+    // Address routes
+    Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+    Route::get('/addresses/areas', [AddressController::class, 'getAreas'])->name('addresses.areas');
+
+    // Order routes
+    Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show')->where('order', '[0-9]+'); // Ensure order ID is numeric
+    Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel')->where('order', '[0-9]+'); // Ensure order ID is numeric
+
+    // Kashier payment routes
+    Route::get('/payments/kashier/initiate', [KashierPaymentController::class, 'initiatePayment'])->name('kashier.payment.initiate');
+    Route::get('/payments/kashier/success', [KashierPaymentController::class, 'handleSuccess'])->name('kashier.payment.success');
+    Route::get('/payments/kashier/failure', [KashierPaymentController::class, 'handleFailure'])->name('kashier.payment.failure');
+
+    // Keep the old route for backward compatibility but mark it as deprecated
+    Route::get('/payments/kashier/{order}', [KashierPaymentController::class, 'showPayment'])->name('kashier.payment.show');
 });
+
+// Kashier webhook - This route is not protected as it's accessed by the Kashier server
+Route::post('/webhooks/kashier', [KashierPaymentController::class, 'handleWebhook'])->name('kashier.payment.webhook');
 
 require __DIR__.'/auth.php';

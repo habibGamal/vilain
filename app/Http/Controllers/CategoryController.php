@@ -22,20 +22,4 @@ class CategoryController extends Controller
             'categories' => $categories
         ]);
     }
-
-    /**
-     * Display the specified category.
-     */
-    public function show(Category $category)
-    {
-        $category->load(['children', 'products' => function($query) {
-            $query->where('is_active', true)
-                ->orderBy('created_at', 'desc')
-                ->take(12);
-        }]);
-
-        return Inertia::render('Categories/Show', [
-            'category' => $category
-        ]);
-    }
 }

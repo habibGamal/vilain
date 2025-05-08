@@ -27,7 +27,7 @@ class BrandSeeder extends Seeder
             'https://images.unsplash.com/photo-1607853202273-797f1c22a38e?q=80&w=400',  // Jewelry
         ];
 
-        $parentBrands = Brand::factory()
+        Brand::factory()
             ->count(8)
             ->create()
             ->each(function ($brand, $index) use ($brandImages) {
@@ -36,14 +36,5 @@ class BrandSeeder extends Seeder
                     'image' => $brandImages[$index % count($brandImages)],
                 ]);
             });
-
-        // Create child brands for some parents
-        foreach ($parentBrands->random(3) as $parentBrand) {
-            Brand::factory()
-                ->count(2)
-                ->create([
-                    'parent_id' => $parentBrand->id,
-                ]);
-        }
     }
 }

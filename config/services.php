@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'kashier' => [
+        'merchant_id' => env('KASHIER_MERCHANT_ID'),
+        'api_key' => env('KASHIER_API_KEY'),
+        'mode' => env('KASHIER_MODE', 'test'), // 'test' or 'live'
+    ],
+
 ];

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Services\ProductListService;
 
 class SearchController extends Controller
 {
@@ -33,7 +35,7 @@ class SearchController extends Controller
     /**
      * Show search results page
      */
-    public function results(Request $request)
+    public function results(Request $request , ProductListService $productListService)
     {
         $query = $request->input('q');
         $page = $request->input('section_search_results_products_page', 1);
@@ -43,99 +45,43 @@ class SearchController extends Controller
         $maxPrice = $request->input('max_price');
         $sortBy = $request->input('sort_by', 'newest');
 
-        $products = [];
+        $searchResults = collect([]);
         $allBrands = [];
         $allCategories = [];
         $priceRange = [];
 
         if (!empty($query) || $brandIds || $categoryIds || $minPrice || $maxPrice) {
-            $searchQuery = Product::query()->where('is_active', true);
-
-            // Apply search query if provided
-            if (!empty($query)) {
-                $searchQuery->where(function($q) use ($query) {
-                    $q->where('name_en', 'LIKE', "%{$query}%")
-                      ->orWhere('name_ar', 'LIKE', "%{$query}%")
-                      ->orWhere('description_en', 'LIKE', "%{$query}%")
-                      ->orWhere('description_ar', 'LIKE', "%{$query}%");
-                });
-            }
-
-            // Apply brand filter if provided
-            if (!empty($brandIds)) {
-                $searchQuery->whereIn('brand_id', $brandIds);
-            }
-
-            // Apply category filter if provided
-            if (!empty($categoryIds)) {
-                $searchQuery->whereIn('category_id', $categoryIds);
-            }
-
-            // Apply price range filter if provided
-            if ($minPrice !== null) {
-                $searchQuery->where('price', '>=', $minPrice);
-            }
-
-            if ($maxPrice !== null) {
-                $searchQuery->where('price', '<=', $maxPrice);
-            }
-
-            // Apply sorting
-            switch ($sortBy) {
-                case 'price_low_high':
-                    $searchQuery->orderBy('price', 'asc');
-                    break;
-                case 'price_high_low':
-                    $searchQuery->orderBy('price', 'desc');
-                    break;
-                case 'name_a_z':
-                    $searchQuery->orderBy('name_en', 'asc');
-                    break;
-                case 'name_z_a':
-                    $searchQuery->orderBy('name_en', 'desc');
-                    break;
-                case 'newest':
-                default:
-                    $searchQuery->orderBy('created_at', 'desc');
-                    break;
-            }
+            // Use the ProductListService to get filtered products
+            $filteredQuery = $productListService->getFilteredProducts([
+                'query' => $query,
+                'brands' => $brandIds,
+                'categories' => $categoryIds,
+                'minPrice' => $minPrice,
+                'maxPrice' => $maxPrice,
+                'sortBy' => $sortBy
+            ]);
 
             // Load relationships
-            $searchQuery->with([
+            $filteredQuery->with([
                 'brand' => function ($query) {
-                    $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
+                    $query->select('id', 'name_en', 'name_ar', 'slug');
                 },
                 'category' => function ($query) {
-                    $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
+                    $query->select('id', 'name_en', 'name_ar', 'slug');
                 }
             ]);
 
-            $searchResults = $searchQuery->paginate(12, ['*'], 'section_search_results_products_page', $page)
+            $searchResults = $filteredQuery->paginate(12, ['*'], 'section_search_results_products_page', $page)
                 ->withQueryString();
 
             // Get all brands for filter
-            $allBrands = \App\Models\Brand::where('is_active', true)
-                ->select('id', 'name_en', 'name_ar')
-                ->orderBy('name_en')
-                ->get();
+            $allBrands = $productListService->getAllBrands();
 
             // Get all categories for filter
-            $allCategories = \App\Models\Category::where('is_active', true)
-                ->select('id', 'name_en', 'name_ar')
-                ->orderBy('name_en')
-                ->get();
+            $allCategories = $productListService->getAllCategories();
 
             // Get price range for filter
-            $priceStats = Product::where('is_active', true)
-                ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
-                ->first();
-
-            $priceRange = [
-                'min' => $priceStats->min_price ?? 0,
-                'max' => $priceStats->max_price ?? 1000,
-            ];
-        } else {
-            $searchResults = collect([]);
+            $priceRange = $productListService->getPriceRange();
         }
 
         return Inertia::render('Search/Results', [
@@ -153,5 +99,25 @@ class SearchController extends Controller
                 'sortBy' => $sortBy,
             ],
         ]);
+    }
+
+    /**
+     * Recursively add all child categories to the array
+     *
+     * @param int $categoryId
+     * @param array &$categoryArray
+     * @return void
+     */
+    private function addChildCategories($categoryId, &$categoryArray)
+    {
+        $childCategories = Category::where('parent_id', $categoryId)->pluck('id')->toArray();
+
+        if (count($childCategories) > 0) {
+            foreach ($childCategories as $childId) {
+                $categoryArray[] = $childId;
+                // Recursively get children of this child
+                $this->addChildCategories($childId, $categoryArray);
+            }
+        }
     }
 }
