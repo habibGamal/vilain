@@ -1,8 +1,21 @@
 import { PageProps } from "@inertiajs/core";
 
 declare namespace App.Models {
-    export interface User {
+    export interface User     export enum SectionType {
+        VIRTUAL = 'VIRTUAL',
+        REAL = 'REAL'
+    }
+    
+    export interface Section {
         id: number;
+        title_en: string;
+        title_ar: string;
+        active: boolean;
+        sort_order: number;
+        section_type: SectionType;
+        products?: Product[];
+        created_at?: string;
+        updated_at?: string;id: number;
         name: string;
         email: string;
         avatar?: string;
@@ -99,6 +112,40 @@ declare namespace App.Models {
         sale_price?: number; // Optional override of product sale price
         color?: string;
         size?: string;
+    }
+    
+    export enum SectionType {
+        VIRTUAL = 'VIRTUAL',
+        REAL = 'REAL'
+    }
+    
+    export interface Section {
+        id: number;
+        title_en: string;
+        title_ar: string;
+        active: boolean;
+        sort_order: number;
+        section_type: SectionType;
+        products?: Product[];
+        created_at?: string;
+        updated_at?: string;
+    }
+
+    export interface Section {
+        id: number;
+        title_en: string;
+        title_ar: string;
+        active: boolean;
+        sort_order: number;
+        section_type: SectionType;
+        products?: Product[];
+        created_at?: string;
+        updated_at?: string;
+    }
+    
+    export enum SectionType {
+        VIRTUAL = 'VIRTUAL',
+        REAL = 'REAL'
         capacity?: string;
         additional_attributes?: Record<string, any>; // For future extensibility
         is_default: boolean;

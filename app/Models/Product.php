@@ -98,6 +98,15 @@ class Product extends Model
     }
 
     /**
+     * Get the sections for the product.
+     */
+    public function sections()
+    {
+        return $this->belongsToMany(Section::class)
+            ->withTimestamps();
+    }
+
+    /**
      * Get the default variant for the product.
      */
     public function defaultVariant()

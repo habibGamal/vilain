@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AreaSeeder::class,
             ShippingCostSeeder::class,
             UserSeeder::class,
+            SectionSeeder::class,
         ]);
     }
 }

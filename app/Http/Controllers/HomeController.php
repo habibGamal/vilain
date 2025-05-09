@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Section;
+use App\Services\SectionService;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
@@ -15,8 +17,12 @@ class HomeController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke()
+    public function __invoke(SectionService $sectionService)
     {
+        // Get sections from the SectionService
+        $activeSections = $sectionService->getAllActiveSections();
+
+        // For backward compatibility, still get featured products the old way
         $query = Product::where('is_active', true)
             ->where('is_featured', true)
             ->with([
@@ -33,6 +39,9 @@ class HomeController extends Controller
             'phpVersion' => PHP_VERSION,
 
             // Home page specific data
+            'sections' => $activeSections,
+            
+            // Keep legacy data for backward compatibility
             'section_feat_products_page_data' => inertia()->merge(
                 $query->items()
             ),
