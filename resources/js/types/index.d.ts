@@ -1,21 +1,9 @@
 import { PageProps } from "@inertiajs/core";
 
 declare namespace App.Models {
-    export interface User     export enum SectionType {
-        VIRTUAL = 'VIRTUAL',
-        REAL = 'REAL'
-    }
-    
-    export interface Section {
+
+    export interface User {
         id: number;
-        title_en: string;
-        title_ar: string;
-        active: boolean;
-        sort_order: number;
-        section_type: SectionType;
-        products?: Product[];
-        created_at?: string;
-        updated_at?: string;id: number;
         name: string;
         email: string;
         avatar?: string;
@@ -113,22 +101,10 @@ declare namespace App.Models {
         color?: string;
         size?: string;
     }
-    
+
     export enum SectionType {
         VIRTUAL = 'VIRTUAL',
         REAL = 'REAL'
-    }
-    
-    export interface Section {
-        id: number;
-        title_en: string;
-        title_ar: string;
-        active: boolean;
-        sort_order: number;
-        section_type: SectionType;
-        products?: Product[];
-        created_at?: string;
-        updated_at?: string;
     }
 
     export interface Section {
@@ -139,18 +115,6 @@ declare namespace App.Models {
         sort_order: number;
         section_type: SectionType;
         products?: Product[];
-        created_at?: string;
-        updated_at?: string;
-    }
-    
-    export enum SectionType {
-        VIRTUAL = 'VIRTUAL',
-        REAL = 'REAL'
-        capacity?: string;
-        additional_attributes?: Record<string, any>; // For future extensibility
-        is_default: boolean;
-        is_active: boolean;
-        product?: Product;
         created_at?: string;
         updated_at?: string;
     }
@@ -165,6 +129,60 @@ declare namespace App.Models {
         product_id: number;
         product: Product;
     }
+
+    // Promotion-related types
+    export interface Promotion {
+        id: number;
+        name_en: string;
+        name_ar: string;
+        code: string | null;
+        description_en: string | null;
+        description_ar: string | null;
+        type: 'percentage' | 'fixed' | 'free_shipping' | 'buy_x_get_y';
+        value: number | null;
+        min_order_value: number | null;
+        usage_limit: number | null;
+        usage_count: number;
+        is_active: boolean;
+        starts_at: string | null;
+        expires_at: string | null;
+        created_at: string;
+        updated_at: string;
+        conditions?: PromotionCondition[];
+        rewards?: PromotionReward[];
+    }
+
+    export interface PromotionCondition {
+        id: number;
+        promotion_id: number;
+        type: 'product' | 'category' | 'brand' | 'customer';
+        entity_id: number | null;
+        quantity: number | null;
+        created_at: string;
+        updated_at: string;
+    }
+
+    export interface PromotionReward {
+        id: number;
+        promotion_id: number;
+        type: 'product' | 'category' | 'brand';
+        entity_id: number | null;
+        quantity: number;
+        discount_percentage: number | null;
+        created_at: string;
+        updated_at: string;
+    }
+
+    export interface PromotionUsage {
+        id: number;
+        promotion_id: number;
+        order_id: number;
+        user_id: number;
+        discount_amount: number;
+        created_at: string;
+        updated_at: string;
+    }
+
     // Order-related types
     export interface Gov {
         id: number;
@@ -222,6 +240,7 @@ declare namespace App.Models {
         discount: string;
         total: string;
         coupon_code?: string;
+        promotion_id?: number;
         shipping_address_id: number;
         notes?: string;
         payment_details?: string;
@@ -229,6 +248,7 @@ declare namespace App.Models {
         user?: User;
         shipping_address?: Address;
         items?: OrderItem[];
+        promotion?: Promotion;
         created_at?: string;
         updated_at?: string;
     }

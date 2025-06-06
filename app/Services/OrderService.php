@@ -9,6 +9,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Address;
 use App\Models\ShippingCost;
+use App\Models\Promotion;
+use App\Enums\PromotionType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -16,15 +18,18 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class OrderService
 {
     protected CartService $cartService;
+    protected PromotionService $promotionService;
 
     /**
      * Create a new service instance.
      *
      * @param CartService $cartService
+     * @param PromotionService $promotionService
      */
-    public function __construct(CartService $cartService)
+    public function __construct(CartService $cartService, PromotionService $promotionService)
     {
         $this->cartService = $cartService;
+        $this->promotionService = $promotionService;
     }
 
     /**
@@ -49,7 +54,8 @@ class OrderService
         ?string $notes = null,
         ?string $paymentId = null,
         ?array $paymentDetails = null,
-        ?PaymentStatus $paymentStatus = null
+        ?PaymentStatus $paymentStatus = null,
+        ?int $promotionId = null
     ): Order
     {
         // Get the user and validate they exist
@@ -59,8 +65,9 @@ class OrderService
         }
 
         // Calculate order totals and get address
-        $orderData = $this->calculateOrderTotal($addressId, $couponCode);
+        $orderData = $this->calculateOrderTotal($addressId, $couponCode, $promotionId);
         $address = $orderData['address'];
+        $appliedPromotion = $orderData['appliedPromotion'] ?? null;
 
         // Get the cart with all its items
         $cart = $this->cartService->getCart();
@@ -86,7 +93,8 @@ class OrderService
             $notes,
             $paymentId,
             $paymentDetails,
-            $paymentStatus
+            $paymentStatus,
+            $appliedPromotion
         ) {
 
             // Create the order
@@ -100,6 +108,7 @@ class OrderService
                 'discount' => $orderData['discount'],
                 'total' => $orderData['total'],
                 'coupon_code' => $couponCode,
+                'promotion_id' => $appliedPromotion ? $appliedPromotion->id : null,
                 'shipping_address_id' => $address->id,
                 'notes' => $notes,
                 'payment_id' => $paymentId,
@@ -156,7 +165,8 @@ class OrderService
      */
     public function calculateOrderTotal(
         int $addressId,
-        ?string $couponCode = null
+        ?string $couponCode = null,
+        ?int $promotionId = null
     ): array
     {
         // Get the user and validate they exist
@@ -189,22 +199,66 @@ class OrderService
         $cartSummary = $this->cartService->getCartSummary();
         $subtotal = $cartSummary['totalPrice'];
 
-        // For now, we'll use 0 for discount, but this could be calculated based on coupon code
+        // Initialize discount and appliedPromotion
         $discount = 0;
+        $appliedPromotion = null;
+        $shippingDiscount = false;
+
+        // Check for promotion code
         if ($couponCode) {
-            // Here you would verify and apply the coupon code
-            // This is a placeholder for future coupon implementation
+            $promotionResult = $this->promotionService->validatePromotionCode($couponCode);
+            if ($promotionResult) {
+                [$discountAmount, $promotion] = $promotionResult;
+                $discount = $discountAmount;
+                $appliedPromotion = $promotion;
+
+                if ($promotion->type === PromotionType::FREE_SHIPPING) {
+                    $shippingDiscount = true;
+                }
+            }
+        }
+        // If no coupon provided, check for specific promotion by ID
+        elseif ($promotionId) {
+            $promotion = Promotion::with(['conditions', 'rewards'])->find($promotionId);
+            if ($promotion && $promotion->is_active) {
+                $discountAmount = $this->promotionService->calculateDiscountAmount($promotion, $cart);
+                if ($discountAmount > 0) {
+                    $discount = $discountAmount;
+                    $appliedPromotion = $promotion;
+
+                    if ($promotion->type === PromotionType::FREE_SHIPPING) {
+                        $shippingDiscount = true;
+                    }
+                }
+            }
+        }
+        // If no specific promotion provided, try to find the best automatic one
+        else {
+            $automaticPromotionResult = $this->promotionService->applyBestAutomaticPromotion($cart);
+            if ($automaticPromotionResult) {
+                [$discountAmount, $promotion] = $automaticPromotionResult;
+                $discount = $discountAmount;
+                $appliedPromotion = $promotion;
+
+                if ($promotion->type === PromotionType::FREE_SHIPPING) {
+                    $shippingDiscount = true;
+                }
+            }
         }
 
+        // Apply shipping discount if applicable
+        $finalShippingCost = $shippingDiscount ? 0 : $shippingCost->value;
+
         // Calculate the total price
-        $total = $subtotal + $shippingCost->value - $discount;
+        $total = $subtotal + $finalShippingCost - $discount;
 
         return [
             'subtotal' => $subtotal,
-            'shippingCost' => $shippingCost->value,
+            'shippingCost' => $finalShippingCost,
             'discount' => $discount,
             'total' => $total,
             'address' => $address,
+            'appliedPromotion' => $appliedPromotion,
         ];
     }
 

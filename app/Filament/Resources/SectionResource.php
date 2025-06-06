@@ -53,8 +53,6 @@ class SectionResource extends Resource
                             ->integer()
                             ->default(0),
                     ]),
-                  Forms\Components\Hidden::make('section_type')
-                    ->default(SectionType::REAL),
 
                 Forms\Components\Section::make('منتجات القسم')
                     ->schema([
@@ -63,6 +61,7 @@ class SectionResource extends Resource
                             ->options(Category::where('is_active', true)
                                 ->pluck('name_' . app()->getLocale(), 'id'))
                             ->searchable()
+                            ->dehydrated(false)
                             ->preload()
                             ->live()
                             ->afterStateUpdated(function ($state, callable $set) {
@@ -74,16 +73,17 @@ class SectionResource extends Resource
                             ->options(function (callable $get) {
                                 $categoryId = $get('category_filter');
                                 $query = Brand::where('is_active', true);
-                                
+
                                 if ($categoryId) {
                                     $productsInCategory = Product::where('category_id', $categoryId)
                                         ->pluck('brand_id');
                                     $query->whereIn('id', $productsInCategory);
                                 }
-                                
+
                                 return $query->pluck('name_' . app()->getLocale(), 'id');
                             })
                             ->searchable()
+                            ->dehydrated(false)
                             ->preload()
                             ->live(),
 
@@ -92,10 +92,10 @@ class SectionResource extends Resource
                             ->relationship(
                                 'products',
                                 'name_' . app()->getLocale(),
-                                fn (Builder $query, callable $get) => $query
+                                fn(Builder $query, callable $get) => $query
                                     ->where('is_active', true)
-                                    ->when($get('category_filter'), fn ($q, $category) => $q->where('category_id', $category))
-                                    ->when($get('brand_filter'), fn ($q, $brand) => $q->where('brand_id', $brand))
+                                    ->when($get('category_filter'), fn($q, $category) => $q->where('category_id', $category))
+                                    ->when($get('brand_filter'), fn($q, $brand) => $q->where('brand_id', $brand))
                             )
                             ->searchable()
                             ->bulkToggleable()
@@ -115,13 +115,15 @@ class SectionResource extends Resource
                     ->label('العنوان بالإنجليزية')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\IconColumn::make('active')
-                    ->label('نشط')
-                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('active')
+                    ->label('نشط'),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('ترتيب العرض')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('section_type')
+                    ->label('نوع القسم')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('products_count')
                     ->label('عدد المنتجات')
                     ->counts('products')
@@ -137,6 +139,7 @@ class SectionResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->reorderable('sort_order')
             ->filters([
                 Tables\Filters\TernaryFilter::make('active')
                     ->label('نشط')
@@ -145,12 +148,15 @@ class SectionResource extends Resource
                     ->falseLabel('غير نشط فقط'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->hidden(fn(Section $record) => $record->isVirtual),
+                Tables\Actions\DeleteAction::make()
+                    ->hidden(fn(Section $record) => $record->isVirtual),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ,
                     Tables\Actions\BulkAction::make('toggleActive')
                         ->label('تبديل النشاط')
                         ->action(function (Collection $records): void {
@@ -160,7 +166,8 @@ class SectionResource extends Resource
                         })
                         ->icon('heroicon-o-arrow-path'),
                 ]),
-            ]);
+            ])
+            ->checkIfRecordIsSelectableUsing(fn(Section $record) => $record->isReal);
     }
 
     public static function getRelations(): array

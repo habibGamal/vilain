@@ -39,24 +39,15 @@ class SectionSeeder extends Seeder
             'title_ar' => 'وصل حديثاً',
             'active' => true,
             'sort_order' => 3,
-            'section_type' => SectionType::REAL
+            'section_type' => SectionType::VIRTUAL
         ]);
-
-        // Get some products to add to the REAL section
-        $products = Product::where('is_active', true)->inRandomOrder()->limit(8)->get();
-        $newProductsSection->products()->attach($products->pluck('id'));
-
         // Another REAL section
         $recommendedSection = Section::create([
             'title_en' => 'Recommended For You',
             'title_ar' => 'موصى به لك',
             'active' => true,
             'sort_order' => 4,
-            'section_type' => SectionType::REAL
+            'section_type' => SectionType::VIRTUAL
         ]);
-
-        // Get some products to add to the second REAL section
-        $moreProducts = Product::where('is_active', true)->inRandomOrder()->limit(6)->get();
-        $recommendedSection->products()->attach($moreProducts->pluck('id'));
     }
 }

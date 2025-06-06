@@ -29,8 +29,11 @@ class Order extends Model
         'discount',
         'total',
         'coupon_code',
+        'promotion_id',
         'shipping_address_id',
         'notes',
+        'payment_id',
+        'payment_details',
     ];
 
     /**
@@ -70,5 +73,13 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Get the promotion applied to the order.
+     */
+    public function promotion(): BelongsTo
+    {
+        return $this->belongsTo(Promotion::class);
     }
 }

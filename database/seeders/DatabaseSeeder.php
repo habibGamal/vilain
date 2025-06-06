@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             ShippingCostSeeder::class,
             UserSeeder::class,
             SectionSeeder::class,
+            AnnouncementSeeder::class,
+            HeroSlideSeeder::class,
         ]);
     }
 }

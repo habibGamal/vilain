@@ -20,6 +20,9 @@ class VariantsRelationManager extends RelationManager
 
     protected static ?string $label = 'متغير';
 
+    protected static ?string $title = 'متغيرات المنتج';
+
+
     public function form(Form $form): Form
     {
         return $form

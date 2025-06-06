@@ -3,13 +3,11 @@ import BrandGrid from "@/Components/BrandGrid";
 import CategoryGrid from "@/Components/CategoryGrid";
 import HeroCarousel from "@/Components/HeroCarousel";
 import ProductGrid from "@/Components/ProductGrid";
-import ProductSection from "@/Components/ProductSection";
 import { useLanguage } from "@/Contexts/LanguageContext";
 import { App } from "@/types";
 import { Head } from "@inertiajs/react";
 
 interface HomePageProps extends App.Interfaces.AppPageProps {
-    featuredProducts: App.Models.Product[];
     announcements: { id: number; title_en: string; title_ar: string }[];
     heroSlides: {
         id: number;
@@ -24,19 +22,18 @@ interface HomePageProps extends App.Interfaces.AppPageProps {
 }
 
 export default function Home({
-    featuredProducts,
     announcements,
     heroSlides,
     categories,
     brands,
     sections,
 }: HomePageProps) {
-    const { t } = useLanguage();
+    const { t, getLocalizedField } = useLanguage();
 
     // Filter active categories and brands
     const activeCategories = categories?.filter((cat) => cat.is_active) || [];
     const activeBrands = brands?.filter((brand) => brand.is_active) || [];
-
+    console.log(sections);
     return (
         <>
             <Head title={t("Home")} />
@@ -63,26 +60,19 @@ export default function Home({
                 title={t("our_brands", "Our Brands")}
             />
 
-            {/* Best Offers Product Grid - Legacy approach */}
-            <ProductGrid
-                sectionId="feat"
-                title={t("best_offers", "Best Offers")}
-                viewAllLink="/products?on_sale=1"
-                emptyMessage={t("no_offers_available", "No offers available")}
-            />
-
-            {/* Dynamic Sections */}
-            {sections && sections.length > 0 && (
-                <div className="space-y-8 my-8">
-                    {sections.map(section => (
-                        <ProductSection 
-                            key={section.id}
-                            section={section}
-                            showViewAll={true}
-                        />
-                    ))}
-                </div>
-            )}
+            {sections &&
+                sections.map((section) => (
+                    <ProductGrid
+                        key={section.id}
+                        sectionId={section.id}
+                        title={getLocalizedField(section, "title")}
+                        viewAllLink={`/sections/${section.id}`}
+                        emptyMessage={t(
+                            "no_products_available",
+                            "No products available in this section"
+                        )}
+                    />
+                ))}
         </>
     );
 }

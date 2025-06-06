@@ -10,9 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\FileUpload;
-use App\Filament\Imports\ProductImporter;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductResource extends Resource
 {
@@ -161,11 +159,13 @@ class ProductResource extends Resource
                     ->label('الفئة')
                     ->relationship('category', 'name_' . app()->getLocale())
                     ->searchable()
+                    ->multiple()
                     ->preload(),
                 Tables\Filters\SelectFilter::make('brand_id')
                     ->label('العلامة التجارية')
                     ->relationship('brand', 'name_' . app()->getLocale())
                     ->searchable()
+                    ->multiple()
                     ->preload(),
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('نشط')
@@ -191,6 +191,34 @@ class ProductResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('activate')
+                        ->label('تفعيل')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->action(fn (Collection $records) => $records->each->update(['is_active' => true]))
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('deactivate')
+                        ->label('إلغاء التفعيل')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->action(fn (Collection $records) => $records->each->update(['is_active' => false]))
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('feature')
+                        ->label('تمييز')
+                        ->icon('heroicon-o-star')
+                        ->color('warning')
+                        ->action(fn (Collection $records) => $records->each->update(['is_featured' => true]))
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('unfeature')
+                        ->label('إلغاء التمييز')
+                        ->icon('heroicon-o-no-symbol')
+                        ->color('gray')
+                        ->action(fn (Collection $records) => $records->each->update(['is_featured' => false]))
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

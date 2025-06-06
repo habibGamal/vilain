@@ -36,7 +36,7 @@ class Section extends Model
      */
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class)
+        return $this->belongsToMany(Product::class,'section_product')
             ->withTimestamps();
     }
 
@@ -47,7 +47,27 @@ class Section extends Model
     {
         $locale = app()->getLocale();
         $column = "title_{$locale}";
-        
+
         return $this->{$column};
+    }
+
+    /**
+     * Determine if the section is a virtual type.
+     *
+     * @return bool
+     */
+    public function getIsVirtualAttribute(): bool
+    {
+        return $this->section_type === SectionType::VIRTUAL;
+    }
+
+    /**
+     * Determine if the section is a real type.
+     *
+     * @return bool
+     */
+    public function getIsRealAttribute(): bool
+    {
+        return $this->section_type === SectionType::REAL;
     }
 }

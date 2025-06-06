@@ -122,7 +122,7 @@ export default function Results({
                 />
             </div>
             <ProductGrid
-                sectionId="search_results"
+                sectionId="search_results_products"
                 emptyMessage={t(
                     "try_different_keywords",
                     "Try different keywords or filters"

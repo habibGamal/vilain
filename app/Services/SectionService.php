@@ -2,121 +2,290 @@
 
 namespace App\Services;
 
+use App\Enums\SectionType;
 use App\Models\Product;
 use App\Models\Section;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class SectionService
 {
     /**
-     * Get all active sections.
+     * The feed scroll service for handling product pagination
      *
+     * @var FeedScrollService
+     */
+    protected FeedScrollService $feedScrollService;
+
+    /**
+     * The recommendation section service for personalized product recommendations
+     *
+     * @var RecommendationSectionService
+     */
+    protected RecommendationSectionService $recommendationSectionService;
+
+    /**
+     * Create a new section service instance.
+     *
+     * @param FeedScrollService $feedScrollService
+     * @param RecommendationSectionService $recommendationSectionService
+     */
+    public function __construct(
+        FeedScrollService $feedScrollService,
+        RecommendationSectionService $recommendationSectionService
+    ) {
+        $this->feedScrollService = $feedScrollService;
+        $this->recommendationSectionService = $recommendationSectionService;
+    }
+
+    /**
+     * Get all sections with their products for the home page.
+     *
+     * @param int $perPage Number of products per page
+     * @return array{sections: Collection, sectionsData: Collection} Data structure with sections and their paginated products
+     */
+    public function getHomeSections(int $perPage = 10): array
+    {
+        // Get sections
+        $realSections = $this->getRealSections();
+        $virtualSections = $this->getVirtualSections();
+        $allSections = $realSections->merge($virtualSections)->sortBy(
+            fn($section) => $section->sort_order
+        )->values();
+
+        // Load products for each active section with pagination
+        $sectionsPaginators = $this->loadSectionProducts($realSections, $virtualSections, $perPage);
+
+        return [
+            'sections' => $allSections,
+            'sectionsData' => $sectionsPaginators,
+        ];
+    }
+
+    /**
+     * Load products for all sections with pagination
+     *
+     * @param Collection $realSections
+     * @param Collection $virtualSections
+     * @param int $perPage
      * @return Collection
      */
-    public function getAllActiveSections(): Collection
+    private function loadSectionProducts(Collection $realSections, Collection $virtualSections, int $perPage): Collection
+    {
+        $sectionsPaginators = collect();
+
+        // Process real sections
+        foreach ($realSections as $section) {
+            $sectionProductsData = $this->getProductsInRealSection($section->id, paginate: true, perPage: $perPage);
+            $sectionsPaginators->push($sectionProductsData);
+        }
+
+        // Process virtual sections
+        foreach ($virtualSections as $section) {
+            $sectionProductsData = $this->getProductsInVirtualSection(
+                $section->id,
+                $section->title_en,
+                paginate: true,
+                perPage: $perPage
+            );
+            $sectionsPaginators->push($sectionProductsData);
+        }
+
+        // Flatten the sections collection to a key-value map for easier access
+        return $sectionsPaginators->flatMap(function ($section) {
+            return $section;
+        });
+    }
+
+    /**
+     * Get all active real sections.
+     *
+     * @return Collection<int, Section>
+     */
+    public function getRealSections(): Collection
+    {
+        return $this->getSectionsByType(SectionType::REAL);
+    }
+
+    /**
+     * Get all active virtual sections.
+     *
+     * @return Collection<int, Section>
+     */
+    public function getVirtualSections(): Collection
+    {
+        return $this->getSectionsByType(SectionType::VIRTUAL);
+    }
+
+    /**
+     * Get sections by type
+     *
+     * @param SectionType $type
+     * @return Collection<int, Section>
+     */
+    private function getSectionsByType(SectionType $type): Collection
     {
         return Section::where('active', true)
+            ->where('section_type', $type)
             ->orderBy('sort_order', 'asc')
-            ->with(['products' => function ($query) {
-                $query->where('is_active', true)
-                    ->with([
-                        'brand' => function ($query) {
-                            $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
-                        }
-                    ]);
-            }])
             ->get();
     }
 
     /**
-     * Get a specific section by ID.
+     * Get a specific section by ID and its products with pagination.
+     *
+     * @param int $id
+     * @param bool $paginate Whether to paginate the products
+     * @param int $perPage Number of products per page if paginated
+     * @return array|Section|null Section with products or paginated feed data
+     */
+    public function getProductsInRealSection(int $id, bool $paginate = false, int $perPage = 10): array|Section|null
+    {
+        // First, get the section
+        $section = $this->findActiveSection($id);
+
+        if (!$section) {
+            return null;
+        }
+
+        // If pagination is requested, use FeedScrollService
+        if ($paginate) {
+            $query = $section->products()->getQuery()->forCards();
+            // dd($query->toSql());
+            return $this->paginateProducts($query, (string) $section->id, $perPage);
+        }
+
+        // Otherwise, use the traditional eager loading
+        $section->load([
+            'products' => function ($query) {
+                $query->forCards();
+            }
+        ]);
+
+        return $section;
+    }
+
+    /**
+     * Find an active section by ID
      *
      * @param int $id
      * @return Section|null
      */
-    public function getSectionById(int $id): ?Section
+    private function findActiveSection(int $id): ?Section
     {
         return Section::where('id', $id)
             ->where('active', true)
-            ->with(['products' => function ($query) {
-                $query->where('is_active', true);
-            }])
             ->first();
     }
 
     /**
-     * Get featured products for a virtual section.
+     * Paginate products query using FeedScrollService
      *
-     * @param int $limit
-     * @param bool $paginate
+     * @param Builder $query
+     * @param string $sectionId
      * @param int $perPage
-     * @return Collection|LengthAwarePaginator
+     * @return array
      */
-    public function getFeaturedProducts(int $limit = 10, bool $paginate = false, int $perPage = 10): Collection|LengthAwarePaginator
+    private function paginateProducts(Builder $query, string $sectionId, int $perPage): array
     {
-        $query = Product::where('is_active', true)
-            ->where('is_featured', true)
-            ->with([
-                'brand' => function ($query) {
-                    $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
-                }
-            ]);
-
-        if ($paginate) {
-            return $query->paginate($perPage);
-        }
-
-        return $query->limit($limit)->get();
+        return $this->feedScrollService->fromQuery($query)
+            ->forSection($sectionId)
+            ->whereConditions(['is_active' => true])
+            ->orderBy('products.id', 'desc')
+            ->perPage($perPage)
+            ->get();
     }
 
     /**
-     * Get products on sale for a virtual section.
+     * Get products for virtual sections with pagination.
      *
-     * @param int $limit
-     * @param bool $paginate
-     * @param int $perPage
-     * @return Collection|LengthAwarePaginator
+     * @param int $id Section ID
+     * @param string $section_name The virtual section type to fetch
+     * @param bool $paginate Whether to paginate the products
+     * @param int $perPage Number of products per page if paginated
+     * @return array Paginated feed data
      */
-    public function getProductsOnSale(int $limit = 10, bool $paginate = false, int $perPage = 10): Collection|LengthAwarePaginator
+    public function getProductsInVirtualSection(int $id, string $section_name, bool $paginate = false, int $perPage = 10): array
     {
-        $query = Product::where('is_active', true)
-            ->whereNotNull('sale_price')
-            ->with([
-                'brand' => function ($query) {
-                    $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
-                }
-            ]);
+        // Choose the appropriate query based on section name
+        $query = $this->getVirtualSectionQuery($section_name);
 
+        // If pagination is requested, use FeedScrollService
         if ($paginate) {
-            return $query->paginate($perPage);
+            return $this->paginateProducts($query, (string) $id, $perPage);
         }
 
-        return $query->limit($limit)->get();
+        // Otherwise, just return the products
+        return ['data' => $query->get()];
     }
 
     /**
-     * Get newly added products for a virtual section.
+     * Get the appropriate query based on virtual section name
      *
-     * @param int $limit
-     * @param bool $paginate
-     * @param int $perPage
-     * @return Collection|LengthAwarePaginator
+     * @param string $section_name
+     * @return Builder
      */
-    public function getNewProducts(int $limit = 10, bool $paginate = false, int $perPage = 10): Collection|LengthAwarePaginator
+    private function getVirtualSectionQuery(string $section_name): Builder
     {
-        $query = Product::where('is_active', true)
-            ->orderBy('created_at', 'desc')
-            ->with([
-                'brand' => function ($query) {
-                    $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
-                }
-            ]);
+        return match ($section_name) {
+            'Featured Products' => $this->getFeaturedProductsSectionQuery(),
+            'Products On Sale' => $this->getOnSaleProductsSectionQuery(),
+            'New Arrivals' => $this->getNewProductsSectionQuery(),
+            'Recommended For You' => $this->getRecommendedProductsSectionQuery(),
+            default => Product::forCards(),
+        };
+    }
 
-        if ($paginate) {
-            return $query->paginate($perPage);
-        }
+    /**
+     * Get query for featured products
+     *
+     * @return Builder
+     */
+    protected function getFeaturedProductsSectionQuery(): Builder
+    {
+        return Product::forCards()
+            ->where('is_featured', true);
+    }
 
-        return $query->limit($limit)->get();
+    /**
+     * Get query for new arrivals products (created in the last 7 days)
+     *
+     * @return Builder
+     */
+    protected function getNewProductsSectionQuery(): Builder
+    {
+        return Product::forCards()
+            ->where('created_at', '>=', now()->subDays(7));
+    }
+
+    /**
+     * Get query for products on sale
+     *
+     * @return Builder
+     */
+    protected function getOnSaleProductsSectionQuery(): Builder
+    {
+        return Product::forCards()
+            ->whereNotNull('sale_price');
+    }
+
+    /**
+     * Get query for recommended products
+     *
+     * Delegates to the RecommendationSectionService which handles:
+     * - Products from categories of user's past orders
+     * - Products from brands of user's past orders
+     * - Products related to items in the user's wishlist
+     * - Products related to items in the user's cart
+     * - Featured products if no user history available
+     * - Recently added products as a fallback
+     *
+     * @return Builder
+     */
+    protected function getRecommendedProductsSectionQuery(): Builder
+    {
+        return $this->recommendationSectionService->getRecommendedProductsQuery();
     }
 }

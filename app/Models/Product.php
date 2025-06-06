@@ -102,7 +102,7 @@ class Product extends Model
      */
     public function sections()
     {
-        return $this->belongsToMany(Section::class)
+        return $this->belongsToMany(Section::class, 'section_product')
             ->withTimestamps();
     }
 
@@ -111,7 +111,10 @@ class Product extends Model
      */
     public function defaultVariant()
     {
-        return $this->variants()->where('is_default', true)->first() ?: $this->variants()->first();
+        return $this->variants()
+            ->where('is_default', true)
+            ->where('is_active', true)
+            ->first() ?: $this->variants()->where('is_active', true)->first();
     }
 
     /**
@@ -161,5 +164,15 @@ class Product extends Model
     public function getIsInStockAttribute(): bool
     {
         return $this->variants->where('quantity', '>', 0)->count() > 0;
+    }
+
+    public function scopeForCards()
+    {
+        return $this->where('is_active', true)
+            ->with([
+                'brand' => function ($query) {
+                    $query->select('id', 'name_en', 'name_ar', 'slug', 'image');
+                }
+            ]);
     }
 }

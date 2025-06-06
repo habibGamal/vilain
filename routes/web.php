@@ -6,6 +6,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SectionController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AddressController;
@@ -28,6 +29,9 @@ Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
 // Category routes
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+
+// Section routes
+Route::get('/sections/{section}', [SectionController::class, 'show'])->name('sections.show');
 
 // Search routes
 Route::get('/search', [SearchController::class, 'results'])->name('search.results');
@@ -60,7 +64,7 @@ Route::middleware('auth')->group(function () {
     // Cart routes
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
-    Route::patch('/cart/{id}', [CartController::class, 'updateItem'])->name('cart.update');
+    Route::patch('/cart/{cartItem}', [CartController::class, 'updateItem'])->name('cart.update');
     Route::delete('/cart/{id}', [CartController::class, 'removeItem'])->name('cart.remove');
     Route::delete('/cart', [CartController::class, 'clearCart'])->name('cart.clear');
     Route::get('/cart/summary', [CartController::class, 'getSummary'])->name('cart.summary');
@@ -75,6 +79,11 @@ Route::middleware('auth')->group(function () {
     // Address routes
     Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
     Route::get('/addresses/areas', [AddressController::class, 'getAreas'])->name('addresses.areas');
+
+    // Promotion routes
+    Route::post('/promotions/apply', [App\Http\Controllers\PromotionController::class, 'applyPromotion'])->name('promotions.apply');
+    Route::delete('/promotions/remove', [App\Http\Controllers\PromotionController::class, 'removePromotion'])->name('promotions.remove');
+    Route::get('/promotions/automatic', [App\Http\Controllers\PromotionController::class, 'getAutomaticPromotions'])->name('promotions.automatic');
 
     // Order routes
     Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');

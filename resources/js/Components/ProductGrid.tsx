@@ -5,6 +5,7 @@ import { Link, WhenVisible, usePage } from "@inertiajs/react";
 import { Skeleton } from "@/Components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import EmptyState from "./ui/empty-state";
+import { App } from "@/types";
 
 interface ProductGridProps {
     title?: string | null;
@@ -23,15 +24,12 @@ export default function ProductGrid({
     emptyMessage,
     className = "",
     sectionId,
-    paginationKey,
-    dataKey,
     viewType = "scroll", // Default to horizontal scrolling view
 }: ProductGridProps) {
     const { t ,direction } = useLanguage();
     const page = usePage();
 
-    // Calculate section-based keys
-    const sectionKey = `section_${sectionId}_products_page`;
+    const sectionKey = `section_${sectionId}_page`;
     const actualDataKey = `${sectionKey}_data`;
     const actualPaginationKey = `${sectionKey}_pagination`;
 
@@ -39,6 +37,8 @@ export default function ProductGrid({
     const products = page.props[actualDataKey] as
         | App.Models.Product[]
         | undefined;
+
+    console.log(page.props[actualPaginationKey]);
     const pagination = page.props[actualPaginationKey] as any;
 
     const ProductCardSkeleton = () => (

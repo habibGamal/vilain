@@ -4,12 +4,17 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartItem;
-use App\Models\Product;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 
 class CartService
 {
+    protected StockValidationService $stockValidator;
+
+    public function __construct(StockValidationService $stockValidator)
+    {
+        $this->stockValidator = $stockValidator;
+    }
     /**
      * Get the current user's cart or create one if it doesn't exist
      *
@@ -17,7 +22,7 @@ class CartService
      */
     public function getOrCreateCart(): Cart
     {
-        $user = Auth::user();
+        $user = Auth::user()->load('cart');
 
         $cart = $user->cart;
 
@@ -29,83 +34,61 @@ class CartService
     }
 
     /**
-     * Add a product to the cart
+     * Add a CartItem to the cart
      *
-     * @param int $productId
+     * @param CartItem $item
      * @param int $quantity
-     * @param int|null $variantId
      * @return CartItem
-     * @throws ModelNotFoundException
      */
-    public function addToCart(int $productId, int $quantity = 1, ?int $variantId = null): CartItem
+    public function addToCart(CartItem $item, int $quantity): CartItem
     {
-        $product = Product::findOrFail($productId);
-        $cart = $this->getOrCreateCart();
-        $variantId = $variantId ? $variantId: $product->defaultVariant()->id;
-        // Check if product and variant combination already exists in cart
-        $query = $cart->items()->where('product_id', $productId);
-        if ($variantId) {
-            $query->where('product_variant_id', $variantId);
-        } else {
-            $query->whereNull('product_variant_id');
-        }
-        $cartItem = $query->first();
+        // Calculate new quantity (existing quantity + new quantity)
+        $newQuantity = $item->quantity + $quantity;
 
-        if ($cartItem) {
-            // Update quantity if product already exists in cart
-            $cartItem->quantity += $quantity;
-            $cartItem->save();
-        } else {
-            // Create new cart item if product doesn't exist in cart
-            $cartItem = $cart->items()->create([
-                'product_id' => $productId,
-                'product_variant_id' => $variantId,
-                'quantity' => $quantity
-            ]);
-        }
+        $this->stockValidator->validateCartItemStock($item, $newQuantity);
 
-        return $cartItem;
+        $item->quantity = $newQuantity;
+
+        $item->save();
+
+        return $item;
     }
 
     /**
      * Update the quantity of a product in the cart
      *
-     * @param int $cartItemId
+     * @param CartItem $item
      * @param int $quantity
      * @return CartItem
-     * @throws ModelNotFoundException
      */
-    public function updateCartItemQuantity(int $cartItemId, int $quantity): CartItem
+    public function updateCartItemQuantity(CartItem $item, int $quantity): CartItem
     {
-        $cart = $this->getOrCreateCart();
-        $cartItem = $cart->items()->findOrFail($cartItemId);
+        $this->stockValidator->validateCartItemStock($item, $quantity);
 
-        if ($quantity <= 0) {
-            return $this->removeFromCart($cartItemId);
-        }
+        $item->quantity = $quantity;
 
-        $cartItem->quantity = $quantity;
-        $cartItem->save();
+        $item->save();
 
-        return $cartItem;
+        return $item;
     }
 
     /**
      * Remove an item from the cart
      *
-     * @param int $cartItemId
-     * @return CartItem The removed cart item
+     * @param CartItem $item
+     * @return bool
      * @throws ModelNotFoundException
      */
-    public function removeFromCart(int $cartItemId): CartItem
+    public function removeFromCart(CartItem $item): bool
     {
-        $cart = $this->getOrCreateCart();
-        $cartItem = $cart->items()->findOrFail($cartItemId);
+        // Check if the item still exists in the database
+        if (!$item->exists) {
+            throw new ModelNotFoundException("Cart item not found: {$item->id}");
+        }
 
-        $removedItem = clone $cartItem;
-        $cartItem->delete();
+        $item->delete();
 
-        return $removedItem;
+        return true;
     }
 
     /**
@@ -116,7 +99,8 @@ class CartService
     public function clearCart(): bool
     {
         $cart = $this->getOrCreateCart();
-        return $cart->items()->delete();
+        $cart->items()->delete();
+        return true;
     }
 
     /**
@@ -140,7 +124,6 @@ class CartService
     public function getCartSummary(): array
     {
         $cart = $this->getCart();
-
         $totalItems = $cart->items->sum('quantity');
         $totalPrice = $cart->getTotalPrice();
 
@@ -149,4 +132,5 @@ class CartService
             'totalPrice' => $totalPrice,
         ];
     }
+
 }

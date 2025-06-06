@@ -114,6 +114,9 @@ class OrderResource extends Resource
                         Forms\Components\TextInput::make('coupon_code')
                             ->label('كوبون')
                             ->disabled(),
+                        Forms\Components\TextInput::make('promotion.name_ar')
+                            ->label('العرض الترويجي')
+                            ->disabled(),
                         Forms\Components\Textarea::make('notes')
                             ->label('ملاحظات')
                             ->disabled()
@@ -172,6 +175,9 @@ class OrderResource extends Resource
                             ->weight('bold'),
                         TextEntry::make('coupon_code')
                             ->label('كوبون')
+                            ->placeholder('-'),
+                        TextEntry::make('promotion.name_ar')
+                            ->label('العرض الترويجي')
                             ->placeholder('-'),
                         TextEntry::make('notes')
                             ->label('ملاحظات')

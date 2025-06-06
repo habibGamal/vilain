@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CartItem;
 use App\Services\CartService;
 use App\Models\Product;
+use CartItemResolverService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -11,10 +13,12 @@ use Illuminate\Support\Facades\Auth;
 class CartController extends Controller
 {
     protected CartService $cartService;
+    protected CartItemResolverService $cartItemResolverService;
 
-    public function __construct(CartService $cartService)
+    public function __construct(CartService $cartService, CartItemResolverService $cartItemResolverService)
     {
         $this->cartService = $cartService;
+        $this->cartItemResolverService = $cartItemResolverService;
     }
 
     /**
@@ -46,10 +50,16 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $cartItem = $this->cartService->addToCart(
+        $cartItem = $this->cartItemResolverService->resolveCartItem(
+            $this->cartService->getOrCreateCart(),
             $validated['product_id'],
-            $validated['quantity'],
             $validated['product_variant_id'] ?? null
+        );
+
+
+        $this->cartService->addToCart(
+            $cartItem,
+            $validated['quantity']
         );
 
         return response()->json([
@@ -67,14 +77,22 @@ class CartController extends Controller
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateItem(Request $request, int $id)
+    public function updateItem(Request $request, CartItem $cartItem)
     {
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cartItem = $this->cartService->updateCartItemQuantity(
-            $id,
+        // Validate that the cart item belongs to the current user's cart
+        if ($cartItem->cart->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to cart item'
+            ], 403);
+        }
+
+        $this->cartService->updateCartItemQuantity(
+            $cartItem,
             $validated['quantity']
         );
 
@@ -92,9 +110,18 @@ class CartController extends Controller
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function removeItem(int $id)
+    public function removeItem(CartItem $cartItem)
     {
-        $this->cartService->removeFromCart($id);
+
+        // Validate that the cart item belongs to the current user's cart
+        if ($cartItem->cart->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to cart item'
+            ], 403);
+        }
+
+        $this->cartService->removeFromCart(item: $cartItem);
 
         return response()->json([
             'success' => true,
