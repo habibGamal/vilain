@@ -1,9 +1,9 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 
 interface OrderThankYouProps {}
 
 export function OrderThankYou({}: OrderThankYouProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     return (
         <div className="text-center py-6 mt-2">

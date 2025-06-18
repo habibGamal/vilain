@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             SectionSeeder::class,
             AnnouncementSeeder::class,
             HeroSlideSeeder::class,
+            SettingsSeeder::class,
         ]);
     }
 }

@@ -6,10 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
+
+    /**
+     * TNTSearch configuration.
+     */
+    public $asYouType = true;
 
     /**
      * The attributes that are mass assignable.
@@ -47,6 +53,29 @@ class Product extends Model
     protected $appends = [
         'featured_image'
     ];
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        $array = [
+            'id' => $this->id,
+            'name_en' => $this->name_en,
+            'name_ar' => $this->name_ar,
+            'description_en' => $this->description_en,
+            'description_ar' => $this->description_ar,
+            'slug' => $this->slug,
+            'brand_name_en' => $this->brand?->name_en,
+            'brand_name_ar' => $this->brand?->name_ar,
+            'category_name_en' => $this->category?->name_en,
+            'category_name_ar' => $this->category?->name_ar,
+        ];
+
+        return $array;
+    }
 
     /**
      * Get the brand that owns the product.
@@ -137,9 +166,9 @@ class Product extends Model
         }
 
         // If no default variant, try the first variant with images
-        $variantWithImages = $this->variants->first(function ($variant) {
+        $variantWithImages = $this->variants->filter(function ($variant) {
             return !empty($variant->images);
-        });
+        })->first();
 
         return $variantWithImages ? $variantWithImages->featured_image : null;
     }

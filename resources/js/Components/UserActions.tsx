@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
 import { Heart, Search, ShoppingCart, User } from "lucide-react";
 import LanguageSwitcher from "@/Components/LanguageSwitcher";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 
 interface UserActionsProps {
@@ -19,7 +19,7 @@ interface UserActionsProps {
 }
 
 export default function UserActions({ user, cartItemsCount = 0, onSearchClick }: UserActionsProps) {
-  const { t } = useLanguage();
+  const { t } = useI18n();
 
   return (
     <div className="flex items-center gap-2 ltr:ml-auto rtl:mr-auto">

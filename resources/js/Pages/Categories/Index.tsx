@@ -1,5 +1,6 @@
 import { Head, Link } from "@inertiajs/react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
+import { resolveStoragePath } from "@/utils/storageUtils";
 import { Card } from "@/Components/ui/card";
 import { Layers, FolderX } from "lucide-react";
 import { Image } from "@/Components/ui/Image";
@@ -13,7 +14,7 @@ interface CategoriesPageProps {
 }
 
 export default function Index({ categories }: CategoriesPageProps) {
-    const { t, getLocalizedField } = useLanguage();
+    const { t, getLocalizedField } = useI18n();
 
     // Function to determine if a category should be featured (larger size)
     const isFeatureCategory = (index: number) => {
@@ -45,10 +46,10 @@ export default function Index({ categories }: CategoriesPageProps) {
                                 className="block h-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             >
                                 <div className="relative h-full bg-background/50 group-hover:bg-muted/5">
-                                    {category.image ? (
+                                    {(category.display_image || category.image) ? (
                                         <div className="relative w-full h-full">
                                             <Image
-                                                src={category.image}
+                                                src={resolveStoragePath(category.display_image || category.image) || ''}
                                                 alt={getLocalizedField(
                                                     category,
                                                     "name"

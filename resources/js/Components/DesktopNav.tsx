@@ -9,7 +9,7 @@ import {
     navigationMenuTriggerStyle,
 } from "@/Components/ui/navigation-menu";
 import { FolderX, ShoppingBag } from "lucide-react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import EmptyState from "./ui/empty-state";
 
@@ -19,7 +19,7 @@ interface DesktopNavProps {
 }
 
 export default function DesktopNav({ brands, categories }: DesktopNavProps) {
-    const { t, getLocalizedField, direction } = useLanguage();
+    const { t, getLocalizedField, direction } = useI18n();
 
     return (
         <div className="hidden flex-1 lg:flex">

@@ -4,16 +4,22 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
+use App\DTOs\CartSummaryData;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 
 class CartService
 {
-    protected StockValidationService $stockValidator;
+    protected CartItemResolverService $cartItemResolver;
+    protected InventoryManagementService $inventoryService;
 
-    public function __construct(StockValidationService $stockValidator)
-    {
-        $this->stockValidator = $stockValidator;
+    public function __construct(
+        InventoryManagementService $inventoryService,
+        CartItemResolverService $cartItemResolver
+    ) {
+        $this->inventoryService = $inventoryService;
+        $this->cartItemResolver = $cartItemResolver;
     }
     /**
      * Get the current user's cart or create one if it doesn't exist
@@ -45,7 +51,7 @@ class CartService
         // Calculate new quantity (existing quantity + new quantity)
         $newQuantity = $item->quantity + $quantity;
 
-        $this->stockValidator->validateCartItemStock($item, $newQuantity);
+        $this->inventoryService->validateCartItemStock($item, $newQuantity);
 
         $item->quantity = $newQuantity;
 
@@ -63,7 +69,7 @@ class CartService
      */
     public function updateCartItemQuantity(CartItem $item, int $quantity): CartItem
     {
-        $this->stockValidator->validateCartItemStock($item, $quantity);
+        $this->inventoryService->validateCartItemStock($item, $quantity);
 
         $item->quantity = $quantity;
 
@@ -119,18 +125,32 @@ class CartService
     /**
      * Get cart summary (total items, total price)
      *
-     * @return array
+     * @return CartSummaryData
      */
-    public function getCartSummary(): array
+    public function getCartSummary(): CartSummaryData
     {
         $cart = $this->getCart();
         $totalItems = $cart->items->sum('quantity');
         $totalPrice = $cart->getTotalPrice();
 
-        return [
-            'totalItems' => $totalItems,
-            'totalPrice' => $totalPrice,
-        ];
+        return new CartSummaryData(
+            totalItems: $totalItems,
+            totalPrice: $totalPrice
+        );
     }
 
+    /**
+     * Convert cart items to order items for a given order
+     *
+     * @param Order $order The order to create items for
+     * @return void
+     */
+    public function toOrderItems(Order $order): void
+    {
+        $cart = $this->getCart();
+
+        foreach ($cart->items as $cartItem) {
+            $this->cartItemResolver->toOrderItem($cartItem, $order);
+        }
+    }
 }

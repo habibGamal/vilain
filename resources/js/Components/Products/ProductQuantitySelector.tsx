@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Minus, Plus } from 'lucide-react';
@@ -10,7 +10,7 @@ interface ProductQuantitySelectorProps {
 }
 
 export default function ProductQuantitySelector({ maxQuantity, onChange }: ProductQuantitySelectorProps) {
-  const { t } = useLanguage();
+  const { t } = useI18n();
   const [quantity, setQuantity] = useState(1);
 
   const handleQuantityChange = (newQuantity: number) => {

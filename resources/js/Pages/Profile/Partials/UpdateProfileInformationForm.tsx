@@ -1,6 +1,6 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/Components/ui/input';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
@@ -8,7 +8,7 @@ import { Button } from '@/Components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm as useHookForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
@@ -19,9 +19,10 @@ export default function UpdateProfileInformation({
     status?: string;
     className?: string;
 }) {
+    // @ts-ignore - Type issue with usePage
     const user = usePage().props.auth.user;
     const { toast } = useToast();
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     // Inertia form for submission
     const { data, setData, patch, errors, processing, recentlySuccessful } =

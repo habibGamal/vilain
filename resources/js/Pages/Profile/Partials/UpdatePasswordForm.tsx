@@ -1,13 +1,13 @@
 import { useForm as useInertiaForm } from '@inertiajs/react';
 import { useRef } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/Components/ui/input";
+import { Button } from "@/Components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
 import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 
 export default function UpdatePasswordForm({
     className = '',
@@ -17,7 +17,7 @@ export default function UpdatePasswordForm({
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     // Inertia form handling
     const {

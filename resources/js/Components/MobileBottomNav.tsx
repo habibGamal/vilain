@@ -1,7 +1,7 @@
 import { Link } from "@inertiajs/react";
 import { Button } from "@/Components/ui/button";
 import { Heart, Home, Search, ShoppingCart } from "lucide-react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 
 interface MobileBottomNavProps {
   cartItemsCount?: number;
@@ -9,7 +9,7 @@ interface MobileBottomNavProps {
 }
 
 export default function MobileBottomNav({ cartItemsCount = 0, onSearchClick }: MobileBottomNavProps) {
-  const { t } = useLanguage();
+  const { t } = useI18n();
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 block border-t border-border bg-background lg:hidden">
       <div className="container flex h-14 items-center justify-between px-4">

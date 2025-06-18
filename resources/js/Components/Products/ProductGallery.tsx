@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import { cn } from "@/lib/utils";
 import { Image } from "@/Components/ui/Image";
@@ -15,7 +15,7 @@ export default function ProductGallery({
     product,
     selectedVariant,
 }: ProductGalleryProps) {
-    const { getLocalizedField } = useLanguage();
+    const { getLocalizedField } = useI18n();
 
     // Get images from product or selected variant
     const images = selectedVariant?.images || product.all_images || [];
@@ -76,12 +76,10 @@ export default function ProductGallery({
                         </Button>
                     </>
                 )}
-            </div>
-
-            {/* Thumbnail navigation for multiple images */}
+            </div>                {/* Thumbnail navigation for multiple images */}
             {images.length > 1 && (
                 <div className="flex flex-wrap gap-2 justify-center">
-                    {images.map((image, index) => (
+                    {images.map((image: string, index: number) => (
                         <button
                             key={index}
                             className={cn(

@@ -4,18 +4,19 @@ import {
   CardContent,
   CardFooter
 } from '@/Components/ui/card';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import useCart from '@/hooks/use-cart';
 import { ShoppingBag } from 'lucide-react';
 import { Image } from '@/Components/ui/Image';
 import { Link } from "@inertiajs/react";
+import { App } from '@/types';
 
 interface ProductCardProps {
   product: App.Models.Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { getLocalizedField, t } = useLanguage();
+  const { getLocalizedField, t } = useI18n();
   const { addToCart, addingToCart } = useCart();
   const discountPercentage = product.sale_price ?
     Math.round(((product.price - product.sale_price) / product.price) * 100) : 0;

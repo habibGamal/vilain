@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/Components/ui/sheet";
 import { Button } from "@/Components/ui/button";
 import { FolderX, Menu, ShoppingBag } from "lucide-react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import LanguageSwitcher from "@/Components/LanguageSwitcher";
 import { App } from "@/types";
 import EmptyState from "./ui/empty-state";
@@ -14,7 +14,7 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ brands, categories }: MobileNavProps) {
-    const { direction, t, getLocalizedField } = useLanguage();
+    const { direction, t, getLocalizedField } = useI18n();
     const isRtl = direction === "rtl";
 
     return (

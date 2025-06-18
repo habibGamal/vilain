@@ -39,7 +39,12 @@ enum PaymentMethod: string implements HasColor, HasIcon, HasLabel
         };
     }
 
-     public static function toSelectArray(): array
+    public function isCOD(): bool
+    {
+        return $this === self::CASH_ON_DELIVERY;
+    }
+
+    public static function toSelectArray(): array
     {
         return [
             self::CASH_ON_DELIVERY->value => self::CASH_ON_DELIVERY->getLabel(),

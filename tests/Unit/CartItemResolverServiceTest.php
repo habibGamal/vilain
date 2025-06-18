@@ -16,7 +16,7 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->cart = Cart::factory()->create(['user_id' => $this->user->id]);
-    $this->service = new CartItemResolverService();
+    $this->service = app(CartItemResolverService::class);
 });
 
 describe('resolveCartItem', function () {
@@ -66,14 +66,13 @@ describe('resolveCartItem', function () {
             'is_default' => true,
             'quantity' => 10,
         ]);
-        $sv = ProductVariant::factory()->create([
+        ProductVariant::factory()->create([
             'product_id' => $product->id,
             'is_active' => true,
             'is_default' => false,
         ]);
 
         $result = $this->service->resolveCartItem($this->cart, $product->id);
-        dd($result->product_variant_id, $defaultVariant->id, $sv->id,$product->variants->map(fn($v) => $v->id));
         expect($result->product_variant_id)->toBe($defaultVariant->id);
     });
 
@@ -147,5 +146,142 @@ describe('resolveCartItem', function () {
 
         expect(fn() => $this->service->resolveCartItem($this->cart, $product->id))
             ->toThrow(ProductVariantNotFoundException::class);
+    });
+});
+
+describe('toOrderItem', function () {
+    beforeEach(function () {
+        $this->user = User::factory()->create();
+        $this->cart = Cart::factory()->create(['user_id' => $this->user->id]);
+        $this->order = \App\Models\Order::factory()->create(['user_id' => $this->user->id]);
+    });
+
+    it('converts cart item to order item with variant price', function () {
+        $product = Product::factory()->create([
+            'price' => 100.00,
+            'sale_price' => null,
+        ]);
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'price' => 80.00,
+            'sale_price' => null,
+            'quantity' => 10,
+        ]);
+
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $this->cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 3,
+        ]);
+
+        $orderItem = $this->service->toOrderItem($cartItem, $this->order);
+
+        expect($orderItem)->toBeInstanceOf(\App\Models\OrderItem::class);
+        expect($orderItem->product_id)->toBe($product->id);
+        expect($orderItem->variant_id)->toBe($variant->id);
+        expect($orderItem->quantity)->toBe(3);
+        expect((float) $orderItem->unit_price)->toBe(80.00);
+        expect((float) $orderItem->subtotal)->toBe(240.00);
+        expect($orderItem->order_id)->toBe($this->order->id);
+
+        // Verify inventory was updated
+        $variant->refresh();
+        expect($variant->quantity)->toBe(7);
+    });
+
+    it('converts cart item to order item with product price when variant has no price', function () {
+        $product = Product::factory()->create([
+            'price' => 100.00,
+            'sale_price' => null,
+        ]);
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'price' => null,
+            'sale_price' => null,
+            'quantity' => 10,
+        ]);
+
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $this->cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2,
+        ]);
+
+        $orderItem = $this->service->toOrderItem($cartItem, $this->order);
+
+        expect((float) $orderItem->unit_price)->toBe(100.00);
+        expect((float) $orderItem->subtotal)->toBe(200.00);
+    });
+
+    it('uses variant sale price when available', function () {
+        $product = Product::factory()->create([
+            'price' => 100.00,
+            'sale_price' => 90.00,
+        ]);
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'price' => 80.00,
+            'sale_price' => 70.00,
+            'quantity' => 10,
+        ]);
+
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $this->cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $orderItem = $this->service->toOrderItem($cartItem, $this->order);
+
+        expect((float) $orderItem->unit_price)->toBe(70.00);
+        expect((float) $orderItem->subtotal)->toBe(70.00);
+    });
+
+    it('uses product sale price when variant has no sale price', function () {
+        $product = Product::factory()->create([
+            'price' => 100.00,
+            'sale_price' => 85.00,
+        ]);
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'price' => 80.00,
+            'sale_price' => null,
+            'quantity' => 10,
+        ]);
+
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $this->cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $orderItem = $this->service->toOrderItem($cartItem, $this->order);
+
+        expect((float) $orderItem->unit_price)->toBe(85.00);
+        expect((float) $orderItem->subtotal)->toBe(85.00);
+    });
+
+    it('throws exception when cart item has no variant', function () {
+        $product = Product::factory()->create([
+            'price' => 50.00,
+        ]);
+
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $this->cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => null,
+            'quantity' => 5,
+        ]);
+
+        expect(fn() => $this->service->toOrderItem($cartItem, $this->order))
+            ->toThrow(\Exception::class, 'Cart item must have a variant to be converted to order item');
     });
 });

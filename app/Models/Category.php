@@ -38,6 +38,16 @@ class Category extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'display_image',
+        'image_url',
+    ];
+
+    /**
      * Get the products for the category.
      */
     public function products(): HasMany
@@ -59,5 +69,42 @@ class Category extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    /**
+     * Get the display image with fallback to first product's featured image.
+     */
+    public function getDisplayImageAttribute(): ?string
+    {
+        // Return the category's own image if it exists
+        if (!empty($this->image)) {
+            return $this->image;
+        }
+
+        // Fallback to first product's featured image
+        $firstProduct = $this->products()
+            ->where('is_active', true)
+            ->first();
+
+        return $firstProduct?->featured_image;
+    }
+
+    /**
+     * Get the image URL with fallback logic.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        $image = $this->display_image;
+
+        if (!$image) {
+            return null;
+        }
+
+        // Return full URL for external images or storage path for local images
+        if (str_starts_with($image, 'http')) {
+            return $image;
+        }
+
+        return asset('storage/' . $image);
     }
 }

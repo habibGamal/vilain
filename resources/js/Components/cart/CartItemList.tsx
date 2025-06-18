@@ -1,5 +1,5 @@
 import { Button } from "@/Components/ui/button";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import { router } from "@inertiajs/react";
 import { CartItem } from "./CartItem";
@@ -21,7 +21,7 @@ export function CartItemList({
   calculateItemTotal,
   clearCart
 }: CartItemListProps) {
-  const { t } = useLanguage();
+  const { t } = useI18n();
 
   return (
     <div className="lg:col-span-2">

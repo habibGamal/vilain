@@ -17,6 +17,8 @@ declare namespace App.Models {
         name_ar: string;
         slug: string;
         image?: string;
+        display_image?: string;
+        image_url?: string;
         is_active: boolean;
         parent_id?: number;
         display_order: number;
@@ -32,6 +34,8 @@ declare namespace App.Models {
         name_ar: string;
         slug: string;
         image?: string;
+        display_image?: string;
+        image_url?: string;
         is_active: boolean;
         parent_id?: number;
         display_order: number;
@@ -46,6 +50,7 @@ declare namespace App.Models {
         name_en: string;
         name_ar: string;
         image: string;
+        featured_image?: string;
         slug: string;
         description_en?: string;
         description_ar?: string;
@@ -65,6 +70,13 @@ declare namespace App.Models {
             length?: number;
             weight?: number;
         };
+        variants?: ProductVariant[];
+        all_images?: string[];
+        total_quantity?: number;
+        isInWishlist?: boolean;
+        isInStock?: boolean;
+        totalQuantity?: number;
+        reviews?: ProductReview[];
         created_at?: string;
         updated_at?: string;
     }
@@ -95,11 +107,24 @@ declare namespace App.Models {
         product_id: number;
         sku: string;
         images?: string[]; // Array of image URLs stored as JSON
+        featured_image?: string; // URL of the featured image
         quantity: number;
         price?: number; // Optional override of product price
         sale_price?: number; // Optional override of product sale price
         color?: string;
         size?: string;
+        capacity?: string;
+        is_default?: boolean;
+    }
+
+    export interface ProductReview {
+        id: number;
+        product_id: number;
+        user_id: number;
+        rating: number;
+        comment: string;
+        created_at: string;
+        user: User;
     }
 
     export enum SectionType {
@@ -245,6 +270,10 @@ declare namespace App.Models {
         notes?: string;
         payment_details?: string;
         payment_id?: string;
+        return_status?: string;
+        delivered_at?: string;
+        return_requested_at?: string;
+        return_reason?: string;
         user?: User;
         shipping_address?: Address;
         items?: OrderItem[];
@@ -264,6 +293,22 @@ declare namespace App.Models {
         order?: Order;
         product?: Product;
         variant?: ProductVariant;
+        created_at?: string;
+        updated_at?: string;
+    }
+
+    export interface Setting {
+        id: number;
+        key: string;
+        group: string;
+        type: 'text' | 'textarea' | 'url' | 'image' | 'boolean' | 'json' | 'integer' | 'float';
+        value: any;
+        label_en: string;
+        label_ar: string;
+        description_en?: string;
+        description_ar?: string;
+        is_required: boolean;
+        display_order: number;
         created_at?: string;
         updated_at?: string;
     }
@@ -288,5 +333,90 @@ declare namespace App.Interfaces {
             itemsCount: number;
             totalPrice: number;
         }
+    }
+
+    export interface SearchSuggestion {
+        id: number;
+        name: string;
+        name_en: string;
+        name_ar: string;
+        slug: string;
+        type: 'product' | 'category' | 'brand';
+        image?: string;
+        price?: number;
+    }
+}
+
+declare namespace App.Types {
+    export interface PriceRange {
+        min: number;
+        max: number;
+    }
+
+    export interface SearchFilters {
+        categories?: App.Models.Category[];
+        brands?: App.Models.Brand[];
+        priceRange?: PriceRange;
+        attributes?: Record<string, string[]>;
+        sort?: string;
+        sortBy?: string;
+        inStock?: boolean;
+        onSale?: boolean;
+        selectedBrands?: string[];
+        selectedCategories?: string[];
+        minPrice?: number | null;
+        maxPrice?: number | null;
+    }
+
+    /**
+     * Promotion data structure returned by the API when applying promotions
+     */
+    export interface PromotionData {
+        discount: number;
+        promotion: {
+            id: number;
+            name: string;
+            code: string;
+            type: App.Models.Promotion['type'];
+        };
+    }
+
+    /**
+     * API response structure for promotion application
+     */
+    export interface PromotionApiResponse {
+        success: boolean;
+        message: string;
+        discount: number;
+        promotion: {
+            id: number;
+            name: string;
+            code: string;
+            type: App.Models.Promotion['type'];
+        };
+        cartSummary?: App.Models.CartSummary;
+    }
+
+    /**
+     * API response structure for promotion removal
+     */
+    export interface PromotionRemovalResponse {
+        success: boolean;
+        message: string;
+        cartSummary?: App.Models.CartSummary;
+    }
+
+    /**
+     * API response structure for automatic promotions
+     */
+    export interface AutomaticPromotionResponse {
+        success: boolean;
+        hasPromotion: boolean;
+        discount?: number;
+        promotion?: {
+            id: number;
+            name: string;
+            type: App.Models.Promotion['type'];
+        };
     }
 }

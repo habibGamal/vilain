@@ -6,8 +6,11 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Http\Requests\KashierPaymentRequest;
 use App\Models\Order;
-use App\Services\KashierPaymentService;
+use App\Interfaces\PaymentServiceInterface;
 use App\Services\OrderService;
+use App\Services\OrderEvaluationService;
+use App\DTOs\OrderPlacementData;
+use App\DTOs\KashierPaymentData;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,23 +19,29 @@ use Inertia\Inertia;
 
 class KashierPaymentController extends Controller
 {
-    protected KashierPaymentService $kashierService;
+    protected PaymentServiceInterface $paymentService;
     protected OrderService $orderService;
+    protected OrderEvaluationService $orderEvaluationService;
 
     /**
      * Create a new controller instance.
      *
-     * @param KashierPaymentService $kashierService
+     * @param PaymentServiceInterface $paymentService
      * @param OrderService $orderService
+     * @param OrderEvaluationService $orderEvaluationService
      */
-    public function __construct(KashierPaymentService $kashierService, OrderService $orderService)
-    {
-        $this->kashierService = $kashierService;
+    public function __construct(
+        PaymentServiceInterface $paymentService,
+        OrderService $orderService,
+        OrderEvaluationService $orderEvaluationService
+    ) {
+        $this->paymentService = $paymentService;
         $this->orderService = $orderService;
+        $this->orderEvaluationService = $orderEvaluationService;
     }
 
     /**
-     * Show the payment page before creating the order
+     * Show the payment page for an existing order
      *
      * @param Request $request
      * @return \Inertia\Response|\Illuminate\Http\RedirectResponse
@@ -40,53 +49,35 @@ class KashierPaymentController extends Controller
     public function initiatePayment(Request $request)
     {
         try {
-            // Validate input
-            $validated = $request->validate([
-                'address_id' => 'required|integer|exists:addresses,id',
-                'coupon_code' => 'nullable|string',
-                'notes' => 'nullable|string',
-            ]);
+            $orderId = $request->input('order_id');
+            // Get the order
+            $order = $this->orderService->getOrderById($orderId);
 
-            // Generate payment params before creating the order
-            $paymentParams = $this->kashierService->generatePreOrderPaymentParams(
-                $validated['address_id'],
-                $validated['coupon_code'] ?? null
-            );
+            // Check if order is already paid
+            if ($order->payment_status->isPaid()) {
+                return redirect()->route('orders.show', $order->id)
+                    ->with('info', 'This order has already been paid.');
+            }
 
-            // Store payment params in session for later retrieval
-            session()->put('kashier_payment_params', $paymentParams);
-            session()->put('order_notes', $validated['notes'] ?? null);
+            // Check if order is using Kashier payment method
+            if ($order->payment_method !== PaymentMethod::KASHIER) {
+                return redirect()->route('orders.show', $order->id)
+                    ->with('error', 'This order does not use online payment.');
+            }
 
-            // Generate URLs
-            $successUrl = route('kashier.payment.success');
-            $failureUrl = route('kashier.payment.failure');
-            $webhookUrl = $this->kashierService->getWebhookUrl();
+            // Generate payment data using our payment service
+            $paymentData = $this->paymentService->pay($order);
+
+            // Store order ID in session for the callback
+            session()->put('kashier_order_id', $order->id);
 
             return Inertia::render('Payments/Kashier', [
-                'kashierParams' => [
-                    'merchantId' => $paymentParams['merchantId'],
-                    'orderId' => $paymentParams['uniqueRef'],
-                    'amount' => $paymentParams['amount'],
-                    'currency' => $paymentParams['currency'],
-                    'hash' => $paymentParams['hash'],
-                    'mode' => $paymentParams['mode'],
-                    'merchantRedirect' => $successUrl,
-                    'failureRedirect' => $failureUrl,
-                    'serverWebhook' => $webhookUrl,
-                    'allowedMethods' => 'card',
-                    'displayMode' => 'ar',
-                    'paymentRequestId' => uniqid('pr_'),
-                ],
-                'orderSummary' => [
-                    'subtotal' => $paymentParams['orderData']['subtotal'],
-                    'shipping' => $paymentParams['orderData']['shippingCost'],
-                    'discount' => $paymentParams['orderData']['discount'],
-                    'total' => $paymentParams['orderData']['total'],
-                ]
+                'kashierParams' => $paymentData->toArray(),
+                'order' => $order
             ]);
         } catch (Exception $e) {
             Log::error('Error initializing Kashier payment: ' . $e->getMessage(), ['exception' => $e]);
-            return redirect()->route('checkout.index')
+            return redirect()->route('orders.index')
                 ->with('error', 'Unable to process payment. Please try again later or contact support.');
         }
     }
@@ -100,20 +91,22 @@ class KashierPaymentController extends Controller
     public function handleSuccess(Request $request)
     {
         try {
-            // Retrieve payment params from session
-            $paymentParams = session()->get('kashier_payment_params');
-            $notes = session()->get('order_notes');
+            // Retrieve order ID from session
+            $orderId = session()->get('kashier_order_id');
 
-            if (!$paymentParams) {
-                Log::error('Payment params not found in session', [
+            if (!$orderId) {
+                Log::error('Order ID not found in session', [
                     'params' => $request->all()
                 ]);
                 return redirect()->route('checkout.index')
                     ->with('error', 'Payment information not found. Please try again.');
             }
 
-            // Verify the signature
-            if (!$this->kashierService->validateSignature($request->all())) {
+            // Get the order
+            $order = $this->orderService->getOrderById($orderId);
+
+            // Verify the payment response
+            if (!$this->paymentService->validatePaymentResponse($request->all())) {
                 Log::warning('Invalid Kashier signature in success callback', [
                     'params' => $request->all()
                 ]);
@@ -125,19 +118,11 @@ class KashierPaymentController extends Controller
             // Payment data from Kashier
             $paymentData = $request->all();
 
-            // Create the order with PAID status and payment details
-            $order = $this->orderService->placeOrderFromCart(
-                $paymentParams['addressId'],
-                PaymentMethod::KASHIER->value,
-                $paymentParams['couponCode'],
-                $notes,
-                $paymentData['paymentId'] ?? $paymentParams['uniqueRef'],
-                $paymentData,
-                PaymentStatus::PAID
-            );
+            // Process the successful payment
+            $this->paymentService->processSuccessfulPayment($order, $paymentData);
 
-            // Clear session payment data
-            session()->forget(['kashier_payment_params', 'order_notes']);
+            // Clear session data
+            session()->forget('kashier_order_id');
 
             return redirect()->route('orders.show', $order->id)
                 ->with('success', 'Payment completed successfully! Your order is being processed.');
@@ -162,13 +147,28 @@ class KashierPaymentController extends Controller
     public function handleFailure(Request $request)
     {
         try {
-            // Clear session payment data
-            session()->forget(['kashier_payment_params', 'order_notes']);
+            // Get order ID from session
+            $orderId = session()->get('kashier_order_id');
+
+            // Clear session data
+            session()->forget('kashier_order_id');
 
             // Log the failure details
             Log::info('Payment failed', [
-                'params' => $request->all()
+                'params' => $request->all(),
+                'orderId' => $orderId
             ]);
+
+            // If we have an order ID, we could mark it as payment failed
+            if ($orderId) {
+                try {
+                    $order = $this->orderService->getOrderById($orderId);
+                    $order->payment_status = PaymentStatus::FAILED;
+                    $order->save();
+                } catch (Exception $orderEx) {
+                    Log::warning('Failed to update order payment status: ' . $orderEx->getMessage());
+                }
+            }
 
             return redirect()->route('checkout.index')
                 ->with('error', 'Payment was not successful. Please try again or use a different payment method.');
@@ -183,19 +183,13 @@ class KashierPaymentController extends Controller
         }
     }
 
-    /**
-     * Handle webhooks from Kashier server
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
     public function handleWebhook(Request $request)
     {
         try {
             Log::info('Kashier webhook received', ['payload' => $request->all()]);
 
             // Verify the signature
-            if (!$this->kashierService->validateSignature($request->all())) {
+            if (!$this->paymentService->validatePaymentResponse($request->all())) {
                 Log::warning('Invalid Kashier signature in webhook', ['params' => $request->all()]);
                 return response()->json(['status' => 'error', 'message' => 'Invalid signature'], 400);
             }
@@ -215,12 +209,12 @@ class KashierPaymentController extends Controller
 
         } catch (Exception $e) {
             Log::error('Error processing Kashier webhook: ' . $e->getMessage(), ['exception' => $e, 'payload' => $request->all()]);
-            return response()->json(['status' => 'error', 'message' => 'Internal server error'], 500);
+            return response()->json(['status' => 'error', 'message' => 'Internal server errorxxx'], 500);
         }
     }
 
     /**
-     * Show the payment iframe page for an order (Legacy method for backward compatibility)
+     * Show the payment iframe page for an existing order
      *
      * @param int $orderId
      * @return \Inertia\Response|\Illuminate\Http\RedirectResponse
@@ -241,43 +235,15 @@ class KashierPaymentController extends Controller
                     ->with('error', 'This order does not use online payment.');
             }
 
-            // Generate payment hash - use order ID directly for this legacy method
-            $merchantId = $this->kashierService->getMerchantId();
-            $amount = number_format($order->total, 2, '.', '');
-            $currency = 'EGP';
-            $orderId = $order->id;
-            $secret = $this->kashierService->getApiKey();
+            // Generate payment data for this order
+            $paymentData = $this->paymentService->pay($order);
 
-            // Create the path string
-            $path = "/?payment={$merchantId}.{$orderId}.{$amount}.{$currency}";
-
-            // Generate the hash
-            $orderHash = hash_hmac('sha256', $path, $secret);
-
-            // Get the required URLs
-            $successUrl = route('kashier.payment.success');
-            $failureUrl = route('kashier.payment.failure');
-            $webhookUrl = $this->kashierService->getWebhookUrl();
-
-            // Store order ID in session for legacy success/failure handler
-            session()->put('legacy_order_id', $order->id);
+            // Store order ID in session for success/failure handler
+            session()->put('kashier_order_id', $order->id);
 
             return Inertia::render('Payments/Kashier', [
                 'order' => $order,
-                'kashierParams' => [
-                    'merchantId' => $merchantId,
-                    'orderId' => $order->id,
-                    'amount' => $amount,
-                    'currency' => $currency,
-                    'hash' => $orderHash,
-                    'mode' => $this->kashierService->getMode(),
-                    'merchantRedirect' => $successUrl,
-                    'failureRedirect' => $failureUrl,
-                    'serverWebhook' => $webhookUrl,
-                    'allowedMethods' => 'card',
-                    'displayMode' => 'ar',
-                    'paymentRequestId' => uniqid('pr_'),
-                ],
+                'kashierParams' => $paymentData->toArray(),
             ]);
         } catch (Exception $e) {
             Log::error('Error showing Kashier payment: ' . $e->getMessage(), ['exception' => $e]);

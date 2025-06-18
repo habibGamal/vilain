@@ -132,9 +132,7 @@ class PromotionResource extends Resource
                     ->placeholder('تلقائي'),
                 Tables\Columns\TextColumn::make('type')
                     ->label('النوع')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state) => PromotionType::from($state)->getLabel())
-                    ->color(fn (string $state) => PromotionType::from($state)->getColor()),
+                    ->badge(),
                 Tables\Columns\TextColumn::make('value')
                     ->label('القيمة')
                     ->formatStateUsing(fn ($state, $record) =>

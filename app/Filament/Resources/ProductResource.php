@@ -141,8 +141,7 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('total_quantity')
                     ->label('المخزون')
                     ->badge()
-                    ->color(fn (Product $record): string => $record->is_in_stock ? 'success' : 'danger')
-                    ->sortable(),
+                    ->color(fn (Product $record): string => $record->is_in_stock ? 'success' : 'danger'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإنشاء')
                     ->dateTime()

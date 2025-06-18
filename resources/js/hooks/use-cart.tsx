@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { router } from "@inertiajs/react";
 import { App } from "@/types";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { toast } from "./use-toast";
 
 type LoadingState = Record<number | string, boolean>;
@@ -10,7 +10,7 @@ type LoadingState = Record<number | string, boolean>;
 export default function useCart() {
     const [isLoading, setIsLoading] = useState<LoadingState>({});
     const [addingToCart, setAddingToCart] = useState<LoadingState>({});
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     /**
      * Add a product to the cart

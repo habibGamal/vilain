@@ -15,12 +15,16 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
      */
     case PENDING = 'pending';
     case PAID = 'paid';
+    case FAILED = 'failed';
+    case REFUNDED = 'refunded';
 
     public function getColor(): ?string
     {
         return match ($this) {
             self::PENDING => 'warning',
             self::PAID => 'success',
+            self::FAILED => 'danger',
+            self::REFUNDED => 'info',
         };
     }
 
@@ -29,6 +33,8 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::PENDING => 'heroicon-o-clock',
             self::PAID => 'heroicon-o-check-circle',
+            self::FAILED => 'heroicon-o-x-circle',
+            self::REFUNDED => 'heroicon-o-arrow-uturn-left',
         };
     }
 
@@ -37,7 +43,29 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::PENDING => 'قيد الانتظار',
             self::PAID => 'تم الدفع',
+            self::FAILED => 'فشل الدفع',
+            self::REFUNDED => 'تم الاسترداد',
         };
+    }
+
+    public function isPaid(): bool
+    {
+        return $this === self::PAID;
+    }
+
+    public function isPending(): bool
+    {
+        return $this === self::PENDING;
+    }
+
+    public function isFailed(): bool
+    {
+        return $this === self::FAILED;
+    }
+
+    public function isRefunded(): bool
+    {
+        return $this === self::REFUNDED;
     }
 
     public static function toSelectArray(): array
@@ -45,6 +73,8 @@ enum PaymentStatus: string implements HasColor, HasIcon, HasLabel
         return [
             self::PENDING->value => self::PENDING->getLabel(),
             self::PAID->value => self::PAID->getLabel(),
+            self::FAILED->value => self::FAILED->getLabel(),
+            self::REFUNDED->value => self::REFUNDED->getLabel(),
         ];
     }
 }

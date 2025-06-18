@@ -1,5 +1,5 @@
 import { Button } from "@/Components/ui/button";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import useCart from "@/hooks/use-cart";
 import { App } from "@/types";
 import { router } from "@inertiajs/react";
@@ -16,7 +16,7 @@ export default function ProductActions({
     quantity,
     selectedVariant,
 }: ProductActionsProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
     const { addToCart, addingToCart } = useCart();
 
     const handleAddToCart = () => {
@@ -25,7 +25,7 @@ export default function ProductActions({
                 // Add with variant ID
                 addToCart(product.id, quantity, selectedVariant.id);
             }
-        } else if (product.total_quantity > 0) {
+        } else if (product.total_quantity && product.total_quantity > 0) {
             // Legacy fallback for products without variants
             addToCart(product.id, quantity);
         }
@@ -33,7 +33,7 @@ export default function ProductActions({
 
     const isOutOfStock = selectedVariant
         ? selectedVariant.quantity <= 0
-        : (product.total_quantity <= 0);
+        : Boolean(product.total_quantity && product.total_quantity <= 0);
 
     const isInWishlist = product.isInWishlist;
 

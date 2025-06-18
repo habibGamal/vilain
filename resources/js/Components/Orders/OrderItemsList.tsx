@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Package } from "lucide-react";
 import {
     Card,
@@ -15,7 +15,8 @@ interface OrderItemsListProps {
 }
 
 export function OrderItemsList({ items }: OrderItemsListProps) {
-    const { t, getLocalizedField } = useLanguage();
+    const { t, getLocalizedField } = useI18n();
+    console.log("OrderItemsList items:", items);
     return (
         <Card className="overflow-hidden border-none rounded-b-none">
             <CardHeader className="pb-3 bg-muted/50 border-b">

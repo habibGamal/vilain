@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { Loader2, Search, X } from 'lucide-react';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { router } from '@inertiajs/react';
-import axios from 'axios';
 import { cn } from '@/lib/utils';
-import { Image } from './ui/Image';
+import { SearchSuggestions } from '@/Components/SearchSuggestions';
 
 interface SearchBarProps {
   isOpen: boolean;
@@ -14,12 +13,10 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
-  const { t, currentLocale , getLocalizedField,direction } = useLanguage();
+  const { t, currentLocale } = useI18n();
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState<string>('');
-  const [suggestions, setSuggestions] = useState<App.Interfaces.SearchSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
   // Focus input when search bar opens
@@ -30,7 +27,6 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
       }, 100);
     } else {
       setQuery('');
-      setSuggestions([]);
       setShowSuggestions(false);
     }
   }, [isOpen]);
@@ -52,34 +48,14 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
     };
   }, [isOpen, onClose]);
 
-  // Fetch suggestions when query changes
+  // Show suggestions when query changes
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (query.length >= 2) {
-        fetchSuggestions();
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [query]);
-
-  const fetchSuggestions = async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await axios.get('/search/suggestions', {
-        params: { q: query }
-      });
-      setSuggestions(data.suggestions);
+    if (query.length >= 2) {
       setShowSuggestions(true);
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-    } finally {
-      setIsLoading(false);
+    } else {
+      setShowSuggestions(false);
     }
-  };
+  }, [query]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,8 +65,8 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
     }
   };
 
-  const handleSuggestionClick = (id: string) => {
-    router.get(`/products/${id}`);
+  const closeSuggestions = () => {
+    setShowSuggestions(false);
     onClose();
   };
 
@@ -151,115 +127,25 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
                   size="sm"
                   variant="default"
                   className="rounded-full h-8 w-8 p-0"
-                  disabled={isLoading}
                   aria-label={t('search')}
                 >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Search className="h-4 w-4" />
-                  )}
+                  <Search className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </form>
 
-          {/* Suggestions */}
-          {showSuggestions && (
-            <div className="mt-6 relative z-10">
-              {suggestions.length > 0 ? (
-                <div className="bg-background border rounded-xl shadow-lg overflow-hidden animate-in fade-in duration-200">
-                  <ul className="divide-y divide-border/40">
-                    {suggestions.map((suggestion) => (
-                      <li key={suggestion.id}>
-                        <button
-                          className="w-full px-4 py-4 text-left flex items-center hover:bg-muted/50 transition-colors duration-200"
-                          onClick={() => handleSuggestionClick(suggestion.id)}
-                        >
-                          {suggestion.image ? (
-                            <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-muted/30">
-                              <Image
-                                src={suggestion.image}
-                                alt={getLocalizedField(suggestion, 'name')}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                              <Search className="h-6 w-6 text-primary/70" />
-                            </div>
-                          )}
-                          <div className="flex-1 ltr:ml-4 rtl:mr-4 rtl:text-right">
-                            <p className="font-medium line-clamp-1">
-                              {getLocalizedField(suggestion, 'name')}
-                            </p>
-                            {suggestion.price && (
-                            <p className="text-sm text-muted-foreground mt-0.5">
-                                {suggestion.price} {t('currency.egp', 'EGP')}
-                            </p>
-                            )}
-                          </div>
-                          <div className="flex-shrink-0 bg-primary/10 rounded-full p-1.5">
-                            <Search className="h-4 w-4 text-primary/70" />
-                          </div>
-                        </button>
-                      </li>
-                    ))}
-                    <li>
-                      <Button
-                        variant="ghost"
-                        onClick={handleSearch}
-                        className="w-full py-3 rounded-none hover:bg-primary/5 text-primary hover:text-primary/90 font-medium"
-                      >
-                        {t('view_all_results')} ({suggestions.length}+)
-                      </Button>
-                    </li>
-                  </ul>
-                </div>
-              ) : query.length >= 2 && !isLoading ? (
-                <div className="bg-background border rounded-xl shadow-lg p-8 text-center animate-in fade-in duration-200">
-                  <div className="mx-auto w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
-                    <Search className="h-8 w-8 text-muted-foreground/70" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-1">{t('no_results_found')}</h3>
-                  <p className="text-muted-foreground">{t('try_different_search')}</p>
-                </div>
-              ) : null}
-            </div>
-          )}
+          {/* Search Suggestions */}
+          <div className="relative">
+            <SearchSuggestions
+              query={query}
+              isOpen={showSuggestions}
+              onClose={closeSuggestions}
+              className="mt-6"
+            />
+          </div>
         </div>
       </div>
     </div>
   );
-
-  return isOpen ? (
-    <div
-      ref={searchRef}
-      className="border-t border-border/40 py-3"
-    >
-      <div className="container flex items-center px-4">
-        <Input
-          ref={searchInputRef}
-          placeholder={t('search_products', "Search products...")}
-          className="flex-1"
-          autoFocus
-        />
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ltr:ml-2 rtl:mr-2"
-          onClick={onClose}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="default"
-          size="sm"
-          className="ltr:ml-1 rtl:mr-1"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  ) : null;
 }

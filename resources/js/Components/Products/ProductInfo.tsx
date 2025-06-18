@@ -1,14 +1,15 @@
 import { Badge } from "@/Components/ui/badge";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Link } from "@inertiajs/react";
 import { AlertCircle, Check } from "lucide-react";
+import { App } from "@/types";
 
 interface ProductInfoProps {
     product: App.Models.Product;
 }
 
 export default function ProductInfo({ product }: ProductInfoProps) {
-    const { getLocalizedField, t } = useLanguage();
+    const { getLocalizedField, t } = useI18n();
     const isInStock = product.isInStock;
     console.log(product)
     return (

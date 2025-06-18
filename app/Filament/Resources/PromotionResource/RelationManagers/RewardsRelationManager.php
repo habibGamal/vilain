@@ -81,10 +81,7 @@ class RewardsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('type')
                     ->label('النوع')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state) => PromotionRewardType::from($state)->getLabel())
-                    ->color(fn (string $state) => PromotionRewardType::from($state)->getColor())
-                    ->icon(fn (string $state) => PromotionRewardType::from($state)->getIcon()),
+                    ->badge(),
 
                 Tables\Columns\TextColumn::make('entity_name')
                     ->label('الاسم')

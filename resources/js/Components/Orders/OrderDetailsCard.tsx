@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { ShoppingBag, Calendar, CreditCard, Tag } from "lucide-react";
 import {
     Card,
@@ -14,7 +14,7 @@ interface OrderDetailsCardProps {
 }
 
 export function OrderDetailsCard({ order }: OrderDetailsCardProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     return (
         <Card className="overflow-hidden border-none shadow-md">

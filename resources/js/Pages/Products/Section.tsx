@@ -1,6 +1,6 @@
 import ProductGrid from "@/Components/ProductGrid";
 import { PageTitle } from "@/Components/ui/page-title";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import { Head } from "@inertiajs/react";
 import { Layers } from "lucide-react";
@@ -10,7 +10,7 @@ export default function SectionPage({
 }: {
     section: App.Models.Section;
 }) {
-    const { getLocalizedField, t, direction } = useLanguage();
+    const { getLocalizedField, t, direction } = useI18n();
 
     return (
         <>

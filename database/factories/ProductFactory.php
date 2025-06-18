@@ -31,7 +31,7 @@ class ProductFactory extends Factory
             'description_en' => $this->faker->paragraphs(3, true),
             'description_ar' => $this->faker->paragraphs(3, true),
             'price' => $this->faker->randomFloat(2, 10, 500),
-            'sale_price' => $this->faker->optional(0.3)->randomFloat(2, 5, 450),
+            'sale_price' => null, // Make deterministic - don't randomly generate
             'cost_price' => $this->faker->randomFloat(2, 1, 300),
             'category_id' => Category::factory(),
             'brand_id' => Brand::factory(),
@@ -47,6 +47,17 @@ class ProductFactory extends Factory
      * @return $this
      */
     public function configure()
+    {
+        // By default, no variants are created
+        return $this;
+    }
+
+    /**
+     * Create a product with variants.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function withVariants()
     {
         return $this->afterCreating(function (Product $product) {
             // Create a default variant
@@ -67,6 +78,37 @@ class ProductFactory extends Factory
                     'quantity' => rand(0, 20),
                 ]);
             }
+        });
+    }
+
+    /**
+     * Create a product with a sale price.
+     *
+     * @param float|null $salePrice
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function withSalePrice(float $salePrice = null): static
+    {
+        return $this->state(function (array $attributes) use ($salePrice) {
+            $price = $attributes['price'] ?? $this->faker->randomFloat(2, 10, 500);
+            return [
+                'sale_price' => $salePrice ?? ($price * 0.8), // 20% discount by default
+            ];
+        });
+    }
+
+    /**
+     * Create a product that's on sale (with random sale price).
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function onSale(): static
+    {
+        return $this->state(function (array $attributes) {
+            $price = $attributes['price'] ?? $this->faker->randomFloat(2, 10, 500);
+            return [
+                'sale_price' => $this->faker->randomFloat(2, 5, $price * 0.9),
+            ];
         });
     }
 }

@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import {
     Home,
     AlertCircle,
@@ -29,7 +29,7 @@ interface ShippingAddressCardProps {
 }
 
 export function ShippingAddressCard({ address }: ShippingAddressCardProps) {
-    const { t, getLocalizedField } = useLanguage();
+    const { t, getLocalizedField } = useI18n();
 
     return (
         <Card className="overflow-hidden border-none shadow-md transition-all hover:shadow-lg">

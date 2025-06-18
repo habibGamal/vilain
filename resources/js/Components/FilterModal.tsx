@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import {
     Sheet,
     SheetContent,
@@ -31,6 +31,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "./ui/collapsible";
+import { App } from "@/types";
 
 // New component for nested categories
 interface CategoryItemProps {
@@ -50,7 +51,7 @@ const CategoryItem = ({
 }: CategoryItemProps) => {
     const [isOpen, setIsOpen] = useState(true);
     const hasChildren = category.children && category.children.length > 0;
-    const { direction } = useLanguage();
+    const { direction } = useI18n();
     return (
         <div className="space-y-1">
             {hasChildren ? (
@@ -149,9 +150,10 @@ export function FilterModal({
     query = "",
     sortBy = "newest",
 }: FilterModalProps) {
-    const { t, currentLocale, direction } = useLanguage();
+    const { t, currentLocale, direction } = useI18n();
     const isRTL = currentLocale === "ar";
 
+    console.log(brands, categories, priceRange, selectedBrands, selectedCategories, minPrice, maxPrice, query, sortBy);
     // Local state for filters
     const [localSelectedBrands, setLocalSelectedBrands] = useState<string[]>(
         selectedBrands || []

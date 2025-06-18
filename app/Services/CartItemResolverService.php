@@ -6,12 +6,21 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Exceptions\ProductNotFoundException;
 use App\Exceptions\ProductVariantNotFoundException;
 use App\Exceptions\InsufficientStockException;
+use App\Services\InventoryManagementService;
 
 class CartItemResolverService
 {
+    protected InventoryManagementService $inventoryService;
+
+    public function __construct(InventoryManagementService $inventoryService)
+    {
+        $this->inventoryService = $inventoryService;
+    }
     /**
      * Resolve and prepare a CartItem for adding to cart.
      * Verifies product & variant existence, checks stock availability,
@@ -134,20 +143,54 @@ class CartItemResolverService
     }
 
     /**
-     * Validate that there's sufficient stock for the requested quantity.
+     * Convert a CartItem to an OrderItem for a given order
+     * Requires that the cart item has a valid variant assigned
      *
-     * @param ProductVariant $variant
-     * @param int $requestedQuantity
-     * @param Product $product
-     * @throws InsufficientStockException
+     * @param CartItem $cartItem The cart item to convert
+     * @param Order $order The order to associate the item with
+     * @return OrderItem The created order item
+     * @throws \Exception If the cart item has no variant
      */
-    protected function validateStock(ProductVariant $variant, int $requestedQuantity, Product $product): void
+    public function toOrderItem(CartItem $cartItem, Order $order): OrderItem
     {
-        if ($variant->quantity < $requestedQuantity) {
-            $productName = $product->name_en ?? $product->name_ar ?? "Product #{$product->id}";
-            throw new InsufficientStockException($requestedQuantity, $variant->quantity, $productName);
+        $product = $cartItem->product;
+        $variant = $cartItem->variant;
+
+        // Ensure variant is always defined
+        if (!$variant) {
+            throw new \Exception('Cart item must have a variant to be converted to order item. Product: ' . $product->name_en);
         }
+
+        // Ensure we have the actual variant model, not just the relationship
+        if (!$variant instanceof ProductVariant) {
+            $variant = ProductVariant::find($cartItem->product_variant_id);
+            if (!$variant) {
+                throw new \Exception('Product variant not found for cart item. Variant ID: ' . $cartItem->product_variant_id);
+            }
+        }
+
+        // Determine the actual price (use variant price if available, otherwise product price)
+        $unitPrice = $variant->price ?: $product->price;
+
+        // Check for sale price (variant sale price takes precedence)
+        if ($variant->sale_price) {
+            $unitPrice = $variant->sale_price;
+        } elseif ($product->sale_price) {
+            $unitPrice = $product->sale_price;
+        }
+
+        // Create the order item
+        $orderItem = $order->items()->create([
+            'product_id' => $product->id,
+            'variant_id' => $variant->id,
+            'quantity' => $cartItem->quantity,
+            'unit_price' => $unitPrice,
+            'subtotal' => $unitPrice * $cartItem->quantity,
+        ]);
+
+        // Reserve inventory using the inventory service
+        $this->inventoryService->reserveInventory($variant, $cartItem->quantity);
+
+        return $orderItem;
     }
-
-
 }

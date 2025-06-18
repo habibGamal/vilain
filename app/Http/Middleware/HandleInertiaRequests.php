@@ -54,8 +54,8 @@ class HandleInertiaRequests extends Middleware
         if ($request->user()) {
             $cartService = app(CartService::class);
             $cartSummary = $cartService->getCartSummary();
-            $cartInfo['itemsCount'] = $cartSummary['totalItems'];
-            $cartInfo['totalPrice'] = $cartSummary['totalPrice'];
+            $cartInfo['itemsCount'] = $cartSummary->totalItems;
+            $cartInfo['totalPrice'] = $cartSummary->totalPrice;
         }
 
         return $cartInfo;

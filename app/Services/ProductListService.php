@@ -15,17 +15,29 @@ class ProductListService
      */
     public function getFilteredProducts(array $filters = [])
     {
-        $query = Product::query()->where('is_active', true);
-
-        // Apply search query if provided
+        // If there's a search query, use TNTSearch and then apply filters
         if (!empty($filters['query'])) {
             $searchQuery = $filters['query'];
-            $query->where(function($q) use ($searchQuery) {
-                $q->where('name_en', 'LIKE', "%{$searchQuery}%")
-                  ->orWhere('name_ar', 'LIKE', "%{$searchQuery}%")
-                  ->orWhere('description_en', 'LIKE', "%{$searchQuery}%")
-                  ->orWhere('description_ar', 'LIKE', "%{$searchQuery}%");
-            });
+
+            // Get search results as IDs first
+            $searchResults = Product::search($searchQuery)
+                ->where('is_active', true)
+                ->get()
+                ->pluck('id')
+                ->toArray();
+
+            // If no search results, return empty query
+            if (empty($searchResults)) {
+                return Product::query()->whereRaw('1 = 0'); // Returns empty result set
+            }
+
+            // Create Eloquent query based on search results
+            $query = Product::query()
+                ->where('is_active', true)
+                ->whereIn('id', $searchResults);
+        } else {
+            // No search query, use regular Eloquent query
+            $query = Product::query()->where('is_active', true);
         }
 
         // Apply brand filter if provided
@@ -86,7 +98,7 @@ class ProductListService
         $allCategoryIds = [$categoryId];
         $this->addChildCategories($categoryId, $allCategoryIds);
 
-        return Product::where('is_active', true)
+        return Product::query()->where('is_active', true)
             ->whereIn('category_id', $allCategoryIds);
     }
 
@@ -95,7 +107,7 @@ class ProductListService
      */
     public function getProductsByBrand(int $brandId): Builder
     {
-        return Product::where('is_active', true)
+        return Product::query()->where('is_active', true)
             ->where('brand_id', $brandId);
     }
 

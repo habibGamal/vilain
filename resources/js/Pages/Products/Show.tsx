@@ -7,7 +7,7 @@ import ProductQuantitySelector from "@/Components/Products/ProductQuantitySelect
 import ProductTabs from "@/Components/Products/ProductTabs";
 import ProductVariantSelector from "@/Components/Products/ProductVariantSelector";
 import { PageTitle } from "@/Components/ui/page-title";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
@@ -19,7 +19,7 @@ interface ShowProps {
 }
 
 export default function Show({ product }: ShowProps) {
-    const { t, getLocalizedField } = useLanguage();
+    const { t, getLocalizedField } = useI18n();
     const [quantity, setQuantity] = useState(1);
     const [selectedVariant, setSelectedVariant] = useState<App.Models.ProductVariant | null>(null);
 
@@ -62,7 +62,7 @@ export default function Show({ product }: ShowProps) {
                     {(product.isInStock || (selectedVariant && selectedVariant.quantity > 0)) && (
                         <div className="space-y-6 mb-6">
                             <ProductQuantitySelector
-                                maxQuantity={selectedVariant ? selectedVariant.quantity : product.totalQuantity || 1}
+                                maxQuantity={selectedVariant ? selectedVariant.quantity : (product.totalQuantity || 1)}
                                 onChange={setQuantity}
                             />
                             <ProductActions

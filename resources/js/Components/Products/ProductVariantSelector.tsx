@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Card, CardContent } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/Components/ui/radio-group";
@@ -7,6 +7,7 @@ import { Label } from "@/Components/ui/label";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/Components/ui/badge";
+import { App } from "@/types";
 
 interface ProductVariantSelectorProps {
     product: App.Models.Product;
@@ -19,19 +20,19 @@ export default function ProductVariantSelector({
     onVariantChange,
     selectedVariantId,
 }: ProductVariantSelectorProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
     const [selectedVariant, setSelectedVariant] = useState<App.Models.ProductVariant | null>(null);
 
     // Get all variants with colors and without colors
-    const variantsWithColors = product.variants?.filter(v => v.color) || [];
-    const variantsWithoutColors = product.variants?.filter(v => !v.color) || [];
+    const variantsWithColors = product.variants?.filter((v: App.Models.ProductVariant) => v.color) || [];
+    const variantsWithoutColors = product.variants?.filter((v: App.Models.ProductVariant) => !v.color) || [];
 
     // Get all unique attributes
-    const uniqueColors = [...new Set(product.variants?.map(v => v.color).filter(Boolean))];
+    const uniqueColors = [...new Set(product.variants?.map((v: App.Models.ProductVariant) => v.color).filter(Boolean))] as string[];
 
     // Get all variants with sizes and without sizes
-    const variantsWithSizes = product.variants?.filter(v => v.size) || [];
-    const variantsWithoutSizes = product.variants?.filter(v => !v.size) || [];
+    const variantsWithSizes = product.variants?.filter((v: App.Models.ProductVariant) => v.size) || [];
+    const variantsWithoutSizes = product.variants?.filter((v: App.Models.ProductVariant) => !v.size) || [];
 
     // Selected attribute values
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export default function ProductVariantSelector({
 
     // Get available sizes based on selected color
     const availableSizesForColor = product.variants
-        ?.filter(v => {
+        ?.filter((v: App.Models.ProductVariant) => {
             // If a color is selected, only show sizes for that color
             if (selectedColor) return v.color === selectedColor;
             // If no color is selected, show:
@@ -48,13 +49,13 @@ export default function ProductVariantSelector({
             // - Or all sizes if there are no variants with colors
             return !v.color || uniqueColors.length === 0;
         })
-        .map(v => v.size)
-        .filter(Boolean) || [];
+        .map((v: App.Models.ProductVariant) => v.size)
+        .filter(Boolean) as string[] || [];
     const uniqueSizes = [...new Set(availableSizesForColor)];
 
     // Get available capacities based on selected color and size
     const availableCapacitiesForColorAndSize = product.variants
-        ?.filter(v => {
+        ?.filter((v: App.Models.ProductVariant) => {
             // Match color if selected
             const colorMatches = !selectedColor || v.color === selectedColor;
             // Match size if selected
@@ -77,12 +78,12 @@ export default function ProductVariantSelector({
                 return true;
             }
         })
-        .map(v => v.capacity)
-        .filter(Boolean) || [];
+        .map((v: App.Models.ProductVariant) => v.capacity)
+        .filter(Boolean) as string[] || [];
     const uniqueCapacities = [...new Set(availableCapacitiesForColorAndSize)];
 
     // Filter available variants based on selections
-    const availableVariants = product.variants?.filter(variant => {
+    const availableVariants = product.variants?.filter((variant: App.Models.ProductVariant) => {
         let matches = true;
         if (selectedColor && variant.color !== selectedColor) matches = false;
         if (selectedSize && variant.size !== selectedSize) matches = false;
@@ -96,7 +97,7 @@ export default function ProductVariantSelector({
 
         // If there's a selected variant ID, use that
         if (selectedVariantId) {
-            const variant = product.variants.find(v => v.id === selectedVariantId);
+            const variant = product.variants.find((v: App.Models.ProductVariant) => v.id === selectedVariantId);
             if (variant) {
                 setSelectedVariant(variant);
                 setSelectedColor(variant.color || null);
@@ -107,7 +108,7 @@ export default function ProductVariantSelector({
         }
 
         // Otherwise, use default variant or first variant
-        const defaultVariant = product.variants.find(v => v.is_default) || product.variants[0];
+        const defaultVariant = product.variants.find((v: App.Models.ProductVariant) => v.is_default) || product.variants[0];
         setSelectedVariant(defaultVariant);
         setSelectedColor(defaultVariant.color || null);
         setSelectedSize(defaultVariant.size || null);
@@ -147,9 +148,9 @@ export default function ProductVariantSelector({
                 <div>
                     <h3 className="text-sm font-medium mb-3">{t("color", "Color")}</h3>
                     <div className="flex flex-wrap gap-2">
-                        {uniqueColors.map((color) => (
+                        {uniqueColors.map((color: string) => (
                             <Button
-                                key={color}
+                                key={color as React.Key}
                                 type="button"
                                 variant={color === selectedColor ? "default" : "outline"}
                                 className={cn(
@@ -180,9 +181,9 @@ export default function ProductVariantSelector({
                 <div>
                     <h3 className="text-sm font-medium mb-3">{t("size", "Size")}</h3>
                     <div className="flex flex-wrap gap-2">
-                        {uniqueSizes.map((size) => (
+                        {uniqueSizes.map((size: string) => (
                             <Button
-                                key={size}
+                                key={size as React.Key}
                                 type="button"
                                 variant={size === selectedSize ? "default" : "outline"}
                                 className={cn(
@@ -216,9 +217,9 @@ export default function ProductVariantSelector({
                 <div>
                     <h3 className="text-sm font-medium mb-3">{t("capacity", "Capacity")}</h3>
                     <div className="flex flex-wrap gap-2">
-                        {uniqueCapacities.map((capacity) => (
+                        {uniqueCapacities.map((capacity: string) => (
                             <Button
-                                key={capacity}
+                                key={capacity as React.Key}
                                 type="button"
                                 variant={capacity === selectedCapacity ? "default" : "outline"}
                                 className={cn(

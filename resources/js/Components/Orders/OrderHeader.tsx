@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Link } from "@inertiajs/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/Components/ui/button";
@@ -10,7 +10,7 @@ interface OrderHeaderProps {
 }
 
 export function OrderHeader({ order }: OrderHeaderProps) {
-    const { t ,direction } = useLanguage();
+    const { t ,direction } = useI18n();
     const ArrowIcon = direction === "rtl" ? ArrowRight : ArrowLeft;
     return (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b">

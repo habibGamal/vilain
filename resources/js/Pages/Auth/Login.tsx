@@ -5,7 +5,7 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Label } from '@/Components/ui/label';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 
 export default function Login({
@@ -15,7 +15,7 @@ export default function Login({
     status?: string;
     canResetPassword: boolean;
 }) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
@@ -96,6 +96,7 @@ export default function Login({
                             id="remember"
                             name="remember"
                             checked={data.remember}
+                            // @ts-ignore - known issue with checkbox type
                             onCheckedChange={(checked) => setData('remember', Boolean(checked))}
                         />
                         <Label

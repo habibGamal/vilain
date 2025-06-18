@@ -93,7 +93,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     router.reload({
       only: ['translations'],
       data: { locale: langCode },
-      preserveState: true,
     });
   };
 

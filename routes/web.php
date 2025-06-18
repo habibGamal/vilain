@@ -11,11 +11,17 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\KashierPaymentController;
+use App\Http\Controllers\OrderReturnController;
 use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\User;
 use App\Notifications\Notify;
+
+Route::get('/', function () {
+    return 'HI';
+});
 
 Route::get('/', App\Http\Controllers\HomeController::class)->name('home');
 
@@ -65,7 +71,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
     Route::patch('/cart/{cartItem}', [CartController::class, 'updateItem'])->name('cart.update');
-    Route::delete('/cart/{id}', [CartController::class, 'removeItem'])->name('cart.remove');
+    Route::delete('/cart/{cartItem}', [CartController::class, 'removeItem'])->name('cart.remove');
     Route::delete('/cart', [CartController::class, 'clearCart'])->name('cart.clear');
     Route::get('/cart/summary', [CartController::class, 'getSummary'])->name('cart.summary');
 
@@ -92,6 +98,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show')->where('order', '[0-9]+'); // Ensure order ID is numeric
     Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel')->where('order', '[0-9]+'); // Ensure order ID is numeric
 
+    // Order return routes
+    Route::post('/orders/{order}/return', [OrderReturnController::class, 'requestReturn'])->name('orders.return.request')->where('order', '[0-9]+');
+    Route::get('/orders/returns/history', [OrderReturnController::class, 'history'])->name('orders.returns.history');
+
     // Kashier payment routes
     Route::get('/payments/kashier/initiate', [KashierPaymentController::class, 'initiatePayment'])->name('kashier.payment.initiate');
     Route::get('/payments/kashier/success', [KashierPaymentController::class, 'handleSuccess'])->name('kashier.payment.success');
@@ -102,6 +112,14 @@ Route::middleware('auth')->group(function () {
 });
 
 // Kashier webhook - This route is not protected as it's accessed by the Kashier server
-Route::post('/webhooks/kashier', [KashierPaymentController::class, 'handleWebhook'])->name('kashier.payment.webhook');
+Route::post('/webhooks/kashier', [KashierPaymentController::class, 'handleWebhook'])->name('kashier.payment.webhook')
+->withoutMiddleware([VerifyCsrfToken::class]);
+
+// API Routes for Settings
+Route::prefix('api')->group(function () {
+    Route::get('/settings', [App\Http\Controllers\Api\SettingsController::class, 'index']);
+    Route::get('/settings/group/{group}', [App\Http\Controllers\Api\SettingsController::class, 'byGroup']);
+    Route::get('/settings/{key}', [App\Http\Controllers\Api\SettingsController::class, 'show']);
+});
 
 require __DIR__.'/auth.php';

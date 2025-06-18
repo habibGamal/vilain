@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { Languages } from 'lucide-react';
 
 interface LanguageSwitcherProps {
@@ -13,7 +13,7 @@ interface LanguageSwitcherProps {
 }
 
 export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
-  const { currentLocale, languages, setLanguage } = useLanguage();
+  const { currentLocale, languages, setLanguage } = useI18n();
 
   return (
     <DropdownMenu>

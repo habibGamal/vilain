@@ -2,7 +2,7 @@ import { Head } from "@inertiajs/react";
 import { App } from "@/types";
 import { Button } from "@/Components/ui/button";
 import ProductCard from "@/Components/ProductCard";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { useState } from "react";
 import { Heart, Trash2 } from "lucide-react";
 import { router } from "@inertiajs/react";
@@ -16,7 +16,7 @@ interface WishlistPageProps {
 }
 
 export default function Index({ items }: WishlistPageProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
     const [removing, setRemoving] = useState<Record<number, boolean>>({});
     const [clearingList, setClearingList] = useState(false);
 

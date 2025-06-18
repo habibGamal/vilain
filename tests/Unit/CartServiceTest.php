@@ -6,7 +6,6 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Services\CartService;
-use App\Services\StockValidationService;
 use App\Exceptions\InsufficientStockException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -248,23 +247,23 @@ describe('getCartSummary', function () {
 
         $summary = $this->cartService->getCartSummary();
 
-        expect($summary['totalItems'])->toBe(5); // 2 + 3
-        expect($summary['totalPrice'])->toBe(800.0); // (2 * 100) + (3 * 200)
+        expect($summary->totalItems)->toBe(5); // 2 + 3
+        expect($summary->totalPrice)->toBe(800.0); // (2 * 100) + (3 * 200)
     });
 
     it('returns zero summary for empty cart', function () {
         $summary = $this->cartService->getCartSummary();
 
-        expect($summary['totalItems'])->toBe(0);
-        expect($summary['totalPrice'])->toBe(0.0);
+        expect($summary->totalItems)->toBe(0);
+        expect($summary->totalPrice)->toBe(0.0);
     });
 
     it('returns correct summary structure', function () {
         $summary = $this->cartService->getCartSummary();
 
-        expect($summary)->toHaveKeys(['totalItems', 'totalPrice']);
-        expect($summary['totalItems'])->toBeInt();
-        expect($summary['totalPrice'])->toBeFloat();
+        expect($summary)->toBeInstanceOf(\App\DTOs\CartSummaryData::class);
+        expect($summary->totalItems)->toBeInt();
+        expect($summary->totalPrice)->toBeFloat();
     });
 });
 
@@ -310,21 +309,236 @@ describe('Cart Service Integration', function () {
 
         // Check summary
         $summary = $this->cartService->getCartSummary();
-        expect($summary['totalItems'])->toBe(6); // 3 + 3
-        expect($summary['totalPrice'])->toBe(1200.0); // (3 * 150) + (3 * 250)
+        expect($summary->totalItems)->toBe(6); // 3 + 3
+        expect($summary->totalPrice)->toBe(1200.0); // (3 * 150) + (3 * 250)
 
         // Remove one item
         $this->cartService->removeFromCart($item1);
 
         $summary = $this->cartService->getCartSummary();
-        expect($summary['totalItems'])->toBe(3);
-        expect($summary['totalPrice'])->toBe(750.0); // 3 * 250
+        expect($summary->totalItems)->toBe(3);
+        expect($summary->totalPrice)->toBe(750.0); // 3 * 250
 
         // Clear cart
         $this->cartService->clearCart();
 
         $summary = $this->cartService->getCartSummary();
-        expect($summary['totalItems'])->toBe(0);
-        expect($summary['totalPrice'])->toBe(0.0);
+        expect($summary->totalItems)->toBe(0);
+        expect($summary->totalPrice)->toBe(0.0);
+    });
+});
+
+describe('toOrderItems', function () {
+    it('converts all cart items to order items successfully', function () {
+        // Product 1: Has sale price on product, variant has sale price (variant sale price should win)
+        $product1 = Product::factory()->create([
+            'price' => 150,
+            'sale_price' => 130
+        ]);
+        // Product 2: No sale price on product, variant has sale price (variant sale price should be used)
+        $product2 = Product::factory()->create([
+            'price' => 250,
+            'sale_price' => null
+        ]);
+
+        $variant1 = ProductVariant::factory()->create([
+            'product_id' => $product1->id,
+            'price' => 120,
+            'sale_price' => 100, // This should be the final price
+            'quantity' => 10
+        ]);
+        $variant2 = ProductVariant::factory()->create([
+            'product_id' => $product2->id,
+            'price' => 200,
+            'sale_price' => 180, // This should be the final price
+            'quantity' => 5
+        ]);
+
+        // Create cart with items
+        $cart = $this->cartService->getOrCreateCart();
+        $cartItem1 = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_id' => $product1->id,
+            'product_variant_id' => $variant1->id,
+            'quantity' => 2
+        ]);
+        $cartItem2 = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_id' => $product2->id,
+            'product_variant_id' => $variant2->id,
+            'quantity' => 3
+        ]);
+
+        // Create an order
+        $order = \App\Models\Order::factory()->create(['user_id' => $this->user->id]);
+
+        // Verify cart has items before conversion
+        expect($cart->items)->toHaveCount(2);
+        expect($order->items)->toHaveCount(0);
+
+        // Convert cart items to order items
+        $this->cartService->toOrderItems($order);
+
+        // Verify order items were created
+        $order->refresh();
+        expect($order->items)->toHaveCount(2);
+
+        // Verify first order item uses variant sale price
+        $orderItem1 = $order->items->where('product_id', $product1->id)->first();
+        expect($orderItem1)->not->toBeNull();
+        expect($orderItem1->product_id)->toBe($product1->id);
+        expect($orderItem1->variant_id)->toBe($variant1->id);
+        expect($orderItem1->quantity)->toBe(2);
+        expect((float) $orderItem1->unit_price)->toBe(100.0); // Variant sale price
+        expect((float) $orderItem1->subtotal)->toBe(200.0); // 100 * 2
+
+        // Verify second order item uses variant sale price
+        $orderItem2 = $order->items->where('product_id', $product2->id)->first();
+        expect($orderItem2)->not->toBeNull();
+        expect($orderItem2->product_id)->toBe($product2->id);
+        expect($orderItem2->variant_id)->toBe($variant2->id);
+        expect($orderItem2->quantity)->toBe(3);
+        expect((float) $orderItem2->unit_price)->toBe(180.0); // Variant sale price
+        expect((float) $orderItem2->subtotal)->toBe(540.0); // 180 * 3
+
+        // Verify inventory was updated
+        $variant1->refresh();
+        $variant2->refresh();
+        expect($variant1->quantity)->toBe(8); // 10 - 2
+        expect($variant2->quantity)->toBe(2); // 5 - 3
+    });
+
+    it('handles empty cart when converting to order items', function () {
+        // Create an empty cart
+        $cart = $this->cartService->getOrCreateCart();
+        expect($cart->items)->toHaveCount(0);
+
+        // Create an order
+        $order = \App\Models\Order::factory()->create(['user_id' => $this->user->id]);
+
+        // Convert empty cart to order items (should not create any)
+        $this->cartService->toOrderItems($order);
+
+        // Verify no order items were created
+        $order->refresh();
+        expect($order->items)->toHaveCount(0);
+    });
+
+    it('converts cart items with sale prices correctly', function () {
+        $product = Product::factory()->create([
+            'price' => 100,
+            'sale_price' => 80
+        ]);
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'price' => 90,
+            'sale_price' => 75,
+            'quantity' => 10
+        ]);
+
+        $cart = $this->cartService->getOrCreateCart();
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2
+        ]);
+
+        $order = \App\Models\Order::factory()->create(['user_id' => $this->user->id]);
+
+        // Convert cart items to order items
+        $this->cartService->toOrderItems($order);
+
+        // Verify order item uses variant sale price
+        $order->refresh();
+        $orderItem = $order->items->first();
+        expect((float) $orderItem->unit_price)->toBe(75.0); // Variant sale price takes precedence
+        expect((float) $orderItem->subtotal)->toBe(150.0); // 75 * 2
+    });
+
+    it('throws exception when cart item has no variant', function () {
+        $product = Product::factory()->create(['price' => 100]);
+
+        $cart = $this->cartService->getOrCreateCart();
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => null, // No variant
+            'quantity' => 1
+        ]);
+
+        $order = \App\Models\Order::factory()->create(['user_id' => $this->user->id]);
+
+        // Should throw exception when trying to convert cart item without variant
+        expect(function () use ($order) {
+            $this->cartService->toOrderItems($order);
+        })->toThrow(\Exception::class, 'Cart item must have a variant');
+    });
+
+    it('uses product sale price when variant has no sale price', function () {
+        $product = Product::factory()->create([
+            'price' => 100,
+            'sale_price' => 85
+        ]);
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'price' => 90,
+            'sale_price' => null, // No variant sale price
+            'quantity' => 10
+        ]);
+
+        $cart = $this->cartService->getOrCreateCart();
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2
+        ]);
+
+        $order = \App\Models\Order::factory()->create(['user_id' => $this->user->id]);
+
+        // Convert cart items to order items
+        $this->cartService->toOrderItems($order);
+
+        // Verify order item uses product sale price (since variant has no sale price)
+        $order->refresh();
+        $orderItem = $order->items->first();
+        expect((float) $orderItem->unit_price)->toBe(85.0); // Product sale price
+        expect((float) $orderItem->subtotal)->toBe(170.0); // 85 * 2
+    });
+
+    it('uses variant price when no sale prices are available', function () {
+        $product = Product::factory()->create([
+            'price' => 100,
+            'sale_price' => null
+        ]);
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $product->id,
+            'price' => 90,
+            'sale_price' => null,
+            'quantity' => 10
+        ]);
+
+        $cart = $this->cartService->getOrCreateCart();
+        $cartItem = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 2
+        ]);
+
+        $order = \App\Models\Order::factory()->create(['user_id' => $this->user->id]);
+
+        // Convert cart items to order items
+        $this->cartService->toOrderItems($order);
+
+        // Verify order item uses variant price (no sale prices available)
+        $order->refresh();
+        $orderItem = $order->items->first();
+        expect((float) $orderItem->unit_price)->toBe(90.0); // Variant price
+        expect((float) $orderItem->subtotal)->toBe(180.0); // 90 * 2
     });
 });

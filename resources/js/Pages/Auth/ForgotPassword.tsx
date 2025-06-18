@@ -4,11 +4,11 @@ import MainLayout from '@/Layouts/MainLayout';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
 
 export default function ForgotPassword({ status }: { status?: string }) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     const { data, setData, post, processing, errors } = useForm({
         email: '',

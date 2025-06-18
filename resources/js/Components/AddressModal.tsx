@@ -24,7 +24,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/Components/ui/select";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -48,7 +48,7 @@ export default function AddressModal({
     onAddressCreated,
     areas: initialAreas,
 }: AddressModalProps) {
-    const { t , direction } = useLanguage();
+    const { t , direction } = useI18n();
     const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [areas, setAreas] = useState<App.Models.Area[]>(initialAreas || []);

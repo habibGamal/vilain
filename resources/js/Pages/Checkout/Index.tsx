@@ -1,50 +1,17 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
-import { Head, router, usePage } from "@inertiajs/react";
+import AddressModal from "@/Components/AddressModal";
+import { CheckoutForm, OrderSummary } from "@/Components/Checkout";
+import { Button } from "@/Components/ui/button";
+import { Form } from "@/Components/ui/form";
+import { PageTitle } from "@/Components/ui/page-title";
+import { useI18n } from "@/hooks/use-i18n";
+import { useToast } from "@/hooks/use-toast";
+import { App } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Head, router } from "@inertiajs/react";
+import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useState, useEffect } from "react";
-import { PageTitle } from "@/Components/ui/page-title";
-import { Button } from "@/Components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/Components/ui/card";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/Components/ui/form";
-import { Input } from "@/Components/ui/input";
-import { Textarea } from "@/Components/ui/textarea";
-import {
-    RadioGroup,
-    RadioGroupItem,
-} from "@/Components/ui/radio-group";
-import { Label } from "@/Components/ui/label";
-import AddressModal from "@/Components/AddressModal";
-import { Alert, AlertDescription } from "@/Components/ui/alert";
-import {
-    Home,
-    MapPin,
-    CreditCard,
-    ArrowRight,
-    ArrowLeft,
-    Plus,
-    ShoppingBag,
-    Truck,
-    Banknote,
-    Receipt,
-    CircleCheck,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 // Order summary type definition
 interface OrderSummary {
@@ -52,6 +19,8 @@ interface OrderSummary {
     shippingCost: number;
     discount: number;
     total: number;
+    shippingDiscount?: boolean;
+    appliedPromotion?: App.Models.Promotion | null;
 }
 
 interface CheckoutProps extends App.Interfaces.AppPageProps {
@@ -77,15 +46,25 @@ const checkoutFormSchema = z.object({
 });
 
 export default function Index({
-    orderSummary,
+    orderSummary: initialOrderSummary,
     cartSummary,
     addresses,
     paymentMethods,
 }: CheckoutProps) {
-    const { t, direction, getLocalizedField } = useLanguage();
-    const ArrowIcon = direction === "rtl" ? ArrowRight : ArrowLeft;
+    const { t, direction } = useI18n();
+    const [orderSummary, setOrderSummary] =
+        useState<typeof initialOrderSummary>(initialOrderSummary);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+    const [couponError, setCouponError] = useState<string | null>(null);
     const { toast } = useToast();
+
+    // Get URL parameters for initial form values
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialCouponCode =
+        urlParams.get("coupon_code") ||
+        orderSummary?.appliedPromotion?.code ||
+        "";
 
     // Initialize form with react-hook-form and zod validation
     const form = useForm<z.infer<typeof checkoutFormSchema>>({
@@ -100,7 +79,7 @@ export default function Index({
                     ? paymentMethods[0]
                     : "cash_on_delivery",
             notes: "",
-            coupon_code: "",
+            coupon_code: initialCouponCode,
         },
     });
 
@@ -108,12 +87,125 @@ export default function Index({
     useEffect(() => {
         const addressId = form.watch("address_id");
         if (addressId) {
+            const appliedCouponCode =
+                orderSummary?.appliedPromotion?.code || "";
+            const data: { address_id: string; coupon_code?: string } = {
+                address_id: addressId,
+            };
+            if (appliedCouponCode) {
+                data.coupon_code = appliedCouponCode;
+            }
             router.reload({
                 only: ["orderSummary"],
-                data: { address_id: addressId },
+                data,
+                onSuccess: (page) => {
+                    if (page.props.orderSummary) {
+                        setOrderSummary(
+                            page.props.orderSummary as OrderSummary
+                        );
+                    }
+                },
             });
         }
     }, [form.watch("address_id")]);
+
+    // Handle coupon application
+    const handleApplyCoupon = () => {
+        const addressId = form.watch("address_id");
+        const couponCode = form.watch("coupon_code");
+
+        if (!addressId) {
+            toast({
+                title: t("address_required", "Address Required"),
+                description: t(
+                    "select_address_first",
+                    "Please select an address first"
+                ),
+                variant: "destructive",
+            });
+            return;
+        }
+
+        if (!couponCode?.trim()) {
+            toast({
+                title: t("coupon_required", "Coupon Code Required"),
+                description: t(
+                    "enter_coupon_code",
+                    "Please enter a coupon code"
+                ),
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsApplyingCoupon(true);
+        setCouponError(null); // Clear any previous errors
+
+        router.reload({
+            only: ["orderSummary"],
+            data: {
+                address_id: addressId,
+                coupon_code: couponCode.trim(),
+            },
+            onFinish: () => setIsApplyingCoupon(false),
+            onSuccess: (page) => {
+                if (page.props.orderSummary) {
+                    setOrderSummary(page.props.orderSummary as OrderSummary);
+                    // Check if the coupon was actually applied by checking if there's a promotion
+                    const newOrderSummary = page.props.orderSummary as OrderSummary;
+                    if (!newOrderSummary.appliedPromotion && newOrderSummary.discount === 0) {
+                        // Coupon was not applied, show error
+                        setCouponError(t(
+                            "invalid_coupon_code",
+                            "Invalid coupon code. Please check and try again."
+                        ));
+                    } else {
+                        setCouponError(null);
+                    }
+                }
+            },
+            onError: (errors) => {
+                // Handle server-side validation errors
+                if (errors.coupon_code) {
+                    setCouponError(errors.coupon_code);
+                } else {
+                    setCouponError(t(
+                        "coupon_error",
+                        "Failed to apply coupon code. Please try again."
+                    ));
+                }
+            },
+        });
+    };
+
+    // Handle coupon removal
+    const handleRemoveCoupon = () => {
+        const addressId = form.watch("address_id");
+
+        if (!addressId) return;
+
+        setIsApplyingCoupon(true);
+        setCouponError(null); // Clear any errors when removing coupon
+        form.setValue("coupon_code", "");
+
+        router.reload({
+            only: ["orderSummary"],
+            data: { address_id: addressId, coupon_code: null },
+            onFinish: () => setIsApplyingCoupon(false),
+            onSuccess: (page) => {
+                if (page.props.orderSummary) {
+                    setOrderSummary(page.props.orderSummary as OrderSummary);
+                }
+            },
+        });
+    };
+
+    // Handle clearing coupon error when user types
+    const handleClearCouponError = () => {
+        if (couponError) {
+            setCouponError(null);
+        }
+    };
 
     // Calculate order totals
     const subtotal = orderSummary
@@ -122,13 +214,17 @@ export default function Index({
     const shippingCost = Number(orderSummary ? orderSummary.shippingCost : 0);
     const discount = orderSummary ? orderSummary.discount : 0;
     const total = subtotal + shippingCost - discount;
+    const appliedPromotionFromBackend = orderSummary?.appliedPromotion;
 
     // Handle order submission
     const onSubmit = (values: z.infer<typeof checkoutFormSchema>) => {
         if (!values.address_id) {
             toast({
                 title: t("address_required", "Address is required"),
-                description: t("select_address_first", "Please select or add a shipping address to continue."),
+                description: t(
+                    "select_address_first",
+                    "Please select or add a shipping address to continue."
+                ),
                 variant: "destructive",
             });
             return;
@@ -186,291 +282,33 @@ export default function Index({
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="grid gap-6 md:grid-cols-3"
+                        className="grid gap-6 md:grid-cols-3 items-start"
                     >
-                        {/* Left Column - Shipping Address and Payment Method */}
-                        <div className="md:col-span-2 space-y-6">
-                            {/* Shipping Address Card */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center">
-                                        <MapPin className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                                        {t("shipping_address", "Shipping Address")}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    {addresses.length === 0 ? (
-                                        <Alert>
-                                            <AlertDescription>
-                                                {t(
-                                                    "no_addresses",
-                                                    "You have no saved addresses. Please add an address to continue."
-                                                )}
-                                            </AlertDescription>
-                                        </Alert>
-                                    ) : (
-                                        <FormField
-                                            control={form.control}
-                                            name="address_id"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormControl>
-                                                        <RadioGroup
-                                                            dir={direction}
-                                                            className="space-y-4"
-                                                            value={field.value}
-                                                            onValueChange={field.onChange}
-                                                        >
-                                                            {addresses.map(
-                                                                (address) => (
-                                                                    <div
-                                                                        key={address.id}
-                                                                        className={`flex items-start gap-3 p-2 rounded-md border cursor-pointer ${
-                                                                            field.value === address.id.toString()
-                                                                            ? "border-primary bg-primary/5"
-                                                                            : "border-border"
-                                                                        }`}
-                                                                    >
-                                                                        <RadioGroupItem
-                                                                            value={address.id.toString()}
-                                                                            id={`address-${address.id}`}
-                                                                            className="mt-1"
-                                                                        />
-                                                                        <Label
-                                                                            htmlFor={`address-${address.id}`}
-                                                                            className="font-medium cursor-pointer flex-1 py-2"
-                                                                        >
-                                                                            <div className="grid gap-1">
-                                                                                <div className="flex items-center gap-2">
-                                                                                    {getLocalizedField(
-                                                                                        address.area?.gov,
-                                                                                        "name"
-                                                                                    )}
-                                                                                    ,{" "}
-                                                                                    {getLocalizedField(
-                                                                                        address.area,
-                                                                                        "name"
-                                                                                    )}
-                                                                                </div>
-                                                                                <div className="text-sm text-muted-foreground">
-                                                                                    {address.content}
-                                                                                </div>
-                                                                            </div>
-                                                                        </Label>
-                                                                    </div>
-                                                                )
-                                                            )}
-                                                        </RadioGroup>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    )}
-                                </CardContent>
-                            </Card>
+                        <CheckoutForm
+                            addresses={addresses}
+                            paymentMethods={paymentMethods}
+                            control={form.control}
+                            direction={direction}
+                        />
 
-                            {/* Payment Method Card */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center">
-                                        <CreditCard className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                                        {t("payment_method", "Payment Method")}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <FormField
-                                        control={form.control}
-                                        name="payment_method"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormControl>
-                                                    <RadioGroup
-                                                        dir={direction}
-                                                        className="space-y-4"
-                                                        value={field.value}
-                                                        onValueChange={field.onChange}
-                                                    >
-                                                        {paymentMethods.map(
-                                                            (method) => (
-                                                                <div
-                                                                    key={method}
-                                                                    className={`flex items-center gap-3 p-2 rounded-md border cursor-pointer ${
-                                                                        field.value === method
-                                                                        ? "border-primary bg-primary/5"
-                                                                        : "border-border"
-                                                                    }`}
-                                                                >
-                                                                    <RadioGroupItem
-                                                                        value={method}
-                                                                        id={`payment-${method}`}
-                                                                    />
-                                                                    <Label
-                                                                        htmlFor={`payment-${method}`}
-                                                                        className="font-medium cursor-pointer flex py-2 items-center gap-2"
-                                                                    >
-                                                                        {method === "cash_on_delivery" && (
-                                                                            <Banknote className="w-4 h-4" />
-                                                                        )}
-                                                                        {method === "kashier" && (
-                                                                            <CreditCard className="w-4 h-4" />
-                                                                        )}
-                                                                        {t(
-                                                                            `payment_method_${method}`,
-                                                                            method === "cash_on_delivery"
-                                                                                ? "Cash on Delivery"
-                                                                                : method === "kashier"
-                                                                                ? "Credit Card (Kashier)"
-                                                                                : method
-                                                                        )}
-                                                                    </Label>
-                                                                </div>
-                                                            )
-                                                        )}
-                                                    </RadioGroup>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </CardContent>
-                            </Card>
-
-                            {/* Order Notes Card */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center">
-                                        <Receipt className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                                        {t("order_notes", "Order Notes")}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <FormField
-                                        control={form.control}
-                                        name="notes"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormControl>
-                                                    <Textarea
-                                                        placeholder={t(
-                                                            "notes_placeholder",
-                                                            "Add any special instructions or notes for your order..."
-                                                        )}
-                                                        {...field}
-                                                        rows={3}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* Right Column - Order Summary */}
-                        <div>
-                            <Card className="sticky top-4">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center">
-                                        <ShoppingBag className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                                        {t("order_summary", "Order Summary")}
-                                    </CardTitle>
-                                    <CardDescription>
-                                        {t("items_in_cart", "Items in your cart")}: {cartSummary.totalItems}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    {/* Order Summary Calculations */}
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-muted-foreground">
-                                                {t("subtotal", "Subtotal")}
-                                            </span>
-                                            <span>{subtotal.toFixed(2)}</span>
-                                        </div>
-
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-1">
-                                                <Truck className="h-4 w-4 text-muted-foreground" />
-                                                <span className="text-muted-foreground">
-                                                    {t("shipping", "Shipping")}
-                                                </span>
-                                            </div>
-                                            <span>
-                                                {form.watch("address_id")
-                                                    ? shippingCost.toFixed(2)
-                                                    : t("select_address", "Select address")}
-                                            </span>
-                                        </div>
-
-                                        {discount > 0 && (
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-muted-foreground">
-                                                    {t("discount", "Discount")}
-                                                </span>
-                                                <span className="text-green-500">
-                                                    -{discount.toFixed(2)}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        <div className="border-t pt-3 mt-3">
-                                            <div className="flex items-center justify-between font-medium">
-                                                <span>{t("total", "Total")}</span>
-                                                <span className="text-lg">
-                                                    {form.watch("address_id")
-                                                        ? total.toFixed(2)
-                                                        : subtotal.toFixed(2)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Optional Coupon Code Input */}
-                                    <div className="pt-4">
-                                        <FormField
-                                            control={form.control}
-                                            name="coupon_code"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>
-                                                        {t("coupon_code", "Coupon Code")}
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder={t(
-                                                                "coupon_placeholder",
-                                                                "Enter coupon code"
-                                                            )}
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button
-                                        type="submit"
-                                        className="w-full"
-                                        size="lg"
-                                        disabled={isSubmitting || addresses.length === 0 || !form.watch("address_id")}
-                                    >
-                                        {isSubmitting ? (
-                                            t("processing_order", "Processing...")
-                                        ) : (
-                                            <>
-                                                <CircleCheck className="w-4 h-4 ltr:mr-2 rtl:ml-2" />
-                                                {t("place_order", "Place Order")}
-                                            </>
-                                        )}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        </div>
+                        <OrderSummary
+                            cartSummary={cartSummary}
+                            subtotal={subtotal}
+                            shippingCost={shippingCost}
+                            discount={discount}
+                            total={total}
+                            appliedPromotion={appliedPromotionFromBackend}
+                            selectedAddressId={form.watch("address_id")}
+                            control={form.control}
+                            watch={form.watch}
+                            isSubmitting={isSubmitting}
+                            isApplyingCoupon={isApplyingCoupon}
+                            onApplyCoupon={handleApplyCoupon}
+                            onRemoveCoupon={handleRemoveCoupon}
+                            addressesLength={addresses.length}
+                            couponError={couponError}
+                            onCouponCodeInput={handleClearCouponError} // Clear error on input
+                        />
                     </form>
                 </Form>
             </div>

@@ -1,5 +1,5 @@
 import ProductCard from "@/Components/ProductCard";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { PackageOpen, ArrowRight, ArrowLeft } from "lucide-react";
 import { Link, WhenVisible, usePage } from "@inertiajs/react";
 import { Skeleton } from "@/Components/ui/skeleton";
@@ -26,7 +26,7 @@ export default function ProductGrid({
     sectionId,
     viewType = "scroll", // Default to horizontal scrolling view
 }: ProductGridProps) {
-    const { t ,direction } = useLanguage();
+    const { t ,direction } = useI18n();
     const page = usePage();
 
     const sectionKey = `section_${sectionId}_page`;

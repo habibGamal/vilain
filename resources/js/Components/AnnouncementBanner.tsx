@@ -1,4 +1,4 @@
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { useEffect, useState } from 'react';
 
 interface AnnouncementBannerProps {
@@ -6,7 +6,7 @@ interface AnnouncementBannerProps {
 }
 
 export default function AnnouncementBanner({ announcements }: AnnouncementBannerProps) {
-  const { getLocalizedField } = useLanguage();
+  const { getLocalizedField } = useI18n();
   const [currentAnnouncementIndex, setCurrentAnnouncementIndex] = useState(0);
 
   // Auto-rotate announcements

@@ -3,11 +3,11 @@ import { FormEventHandler } from 'react';
 import MainLayout from '@/Layouts/MainLayout';
 import { Button } from '@/Components/ui/button';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { router } from '@inertiajs/react';
 
 export default function VerifyEmail({ status }: { status?: string }) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -57,7 +57,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 </div>
 
                 <form method="POST" action={route('logout')} className="mt-4 text-center">
-                    <input type="hidden" name="_token" value={document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')} />
+                    <input type="hidden" name="_token" value={document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''} />
                     <Button
                         type="submit"
                         variant="ghost"

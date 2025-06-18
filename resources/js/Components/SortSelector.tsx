@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ export function SortSelector({
   minPrice = null,
   maxPrice = null,
 }: SortSelectorProps) {
-  const { t, currentLocale , direction } = useLanguage();
+  const { t, currentLocale , direction } = useI18n();
   const isRTL = direction === 'rtl';
 
   const handleSortChange = (value: string) => {

@@ -1,7 +1,7 @@
 import { Button } from "@/Components/ui/button";
 import { CartItemList } from "@/Components/Cart/CartItemList";
 import { OrderSummary } from "@/Components/Cart/OrderSummary";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import useCart from "@/hooks/use-cart";
 import { App } from "@/types";
 import { Head, router } from "@inertiajs/react";
@@ -15,7 +15,7 @@ interface CartIndexProps extends App.Interfaces.AppPageProps {
 }
 
 export default function Index({ auth,  cart, cartSummary }: CartIndexProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
     const {
         isLoading,
         updateCartItemQuantity,

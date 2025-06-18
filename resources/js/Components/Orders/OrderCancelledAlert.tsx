@@ -1,10 +1,10 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { AlertCircle } from "lucide-react";
 
 interface OrderCancelledAlertProps {}
 
 export function OrderCancelledAlert({}: OrderCancelledAlertProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     return (
         <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900/50 p-6 flex gap-4 items-center">

@@ -1,14 +1,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Star } from "lucide-react";
 import EmptyState from "../ui/empty-state";
+import { App } from "@/types";
 
 interface ProductTabsProps {
     product: App.Models.Product;
 }
 
 export default function ProductTabs({ product }: ProductTabsProps) {
-    const { t, getLocalizedField, direction } = useLanguage();
+    const { t, getLocalizedField, direction } = useI18n();
 
     return (
         <Tabs defaultValue="specifications" dir={direction}>
@@ -28,7 +29,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
             <TabsContent value="reviews" className="py-4">
                 {product.reviews && product.reviews.length > 0 ? (
                     <div className="space-y-6">
-                        {product.reviews.map((review, index) => (
+                        {product.reviews.map((review: App.Models.ProductReview, index: number) => (
                             <div
                                 key={index}
                                 className="border-b pb-4 last:border-0"

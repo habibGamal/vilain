@@ -7,7 +7,7 @@ import {
     CarouselPrevious,
 } from "@/Components/ui/carousel";
 import { Image } from "@/Components/ui/Image";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@inertiajs/react";
 
@@ -26,7 +26,7 @@ interface HeroCarouselProps {
 }
 
 export default function HeroCarousel({ heroSlides }: HeroCarouselProps) {
-    const { getLocalizedField, direction } = useLanguage();
+    const { getLocalizedField, direction } = useI18n();
     const directionIcon =
         direction === "rtl" ? (
             <ChevronLeft className="h-4 w-4" />

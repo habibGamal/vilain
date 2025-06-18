@@ -4,7 +4,7 @@ import { Card } from "@/Components/ui/card";
 import UpdatePasswordForm from "./Partials/UpdatePasswordForm";
 import DeleteUserForm from "./Partials/DeleteUserForm";
 import UpdateProfileInformation from "./Partials/UpdateProfileInformationForm";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { PageTitle } from "@/Components/ui/page-title";
 import { UserCog } from "lucide-react";
 
@@ -12,7 +12,7 @@ export default function Edit({
     mustVerifyEmail,
     status,
 }: { mustVerifyEmail: boolean; status?: string }) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     return (
         <>

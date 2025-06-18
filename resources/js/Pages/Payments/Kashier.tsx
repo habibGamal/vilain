@@ -4,7 +4,7 @@ import { Card } from '@/Components/ui/card';
 import { Loader2, Check, AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/Components/ui/alert';
 import { Button } from '@/Components/ui/button';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 import { PageTitle } from '@/Components/ui/page-title';
 import { App } from '@/types';
 import { Spinner } from '@/Components/ui/spinner';
@@ -28,10 +28,10 @@ interface KashierProps extends App.Interfaces.AppPageProps {
 }
 
 export default function Kashier({ kashierParams }: KashierProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
     const iframeLoaded = useRef(false);
     const iframeErrored = useRef(false);
-
+    console.log('Kashier Params:', kashierParams);
     useEffect(() => {
         // Load the Kashier checkout script
         const script = document.createElement('script');
@@ -89,7 +89,6 @@ export default function Kashier({ kashierParams }: KashierProps) {
                         {/* Payment Status */}
                         <div className="text-center space-y-6">
                             <div className="flex flex-col items-center gap-4">
-                                <Spinner className="h-16 w-16" />
                                 <h2 className="text-xl font-medium">
                                     {t('initializing_payment', 'Initializing Payment')}
                                 </h2>

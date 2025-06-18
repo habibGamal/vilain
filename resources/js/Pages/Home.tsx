@@ -3,7 +3,8 @@ import BrandGrid from "@/Components/BrandGrid";
 import CategoryGrid from "@/Components/CategoryGrid";
 import HeroCarousel from "@/Components/HeroCarousel";
 import ProductGrid from "@/Components/ProductGrid";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
+import { useSiteBranding } from "@/hooks/useSettings";
 import { App } from "@/types";
 import { Head } from "@inertiajs/react";
 
@@ -28,15 +29,17 @@ export default function Home({
     brands,
     sections,
 }: HomePageProps) {
-    const { t, getLocalizedField } = useLanguage();
+    const { t, getLocalizedField } = useI18n();
+    const { title } = useSiteBranding();
 
     // Filter active categories and brands
     const activeCategories = categories?.filter((cat) => cat.is_active) || [];
     const activeBrands = brands?.filter((brand) => brand.is_active) || [];
-    console.log(sections);
+    console.log(activeCategories);
+
     return (
         <>
-            <Head title={t("Home")} />
+            <Head title={title} />
 
             {/* Top Announcement Banner */}
             {announcements && announcements.length > 0 && (

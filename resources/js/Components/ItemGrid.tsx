@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { ArrowRight, ArrowLeft, LayoutGrid } from "lucide-react";
 import { Link, WhenVisible, usePage } from "@inertiajs/react";
 import { Skeleton } from "@/Components/ui/skeleton";
@@ -50,7 +50,7 @@ export default function ItemGrid<T = any>({
         xl: "xl:grid-cols-5",
     },
 }: ItemGridProps<T>) {
-    const { t, direction } = useLanguage();
+    const { t, direction } = useI18n();
     const page = usePage();
 
     // Calculate section-based keys

@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { CardFooter } from "@/Components/ui/card";
 import { Separator } from "@/Components/ui/separator";
 import { App } from "@/types";
@@ -8,7 +8,7 @@ interface OrderSummaryProps {
 }
 
 export function OrderSummary({ order }: OrderSummaryProps) {
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     return (
         <CardFooter className="pt-6 bg-muted/20">

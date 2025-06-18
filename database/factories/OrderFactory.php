@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Models\Address;
 use App\Models\Order;
@@ -36,7 +37,7 @@ class OrderFactory extends Factory
             'user_id' => User::factory(),
             'order_status' => fake()->randomElement(OrderStatus::cases()),
             'payment_status' => fake()->randomElement(PaymentStatus::cases()),
-            'payment_method' => fake()->randomElement(['credit_card', 'paypal', 'cash_on_delivery']),
+            'payment_method' => fake()->randomElement(PaymentMethod::cases()),
             'subtotal' => $subtotal,
             'shipping_cost' => $shippingCost,
             'discount' => $discount,

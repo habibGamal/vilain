@@ -97,4 +97,12 @@ class Promotion extends Model
 
         return true;
     }
+
+    /**
+     * Check if this promotion provides free shipping.
+     */
+    public function isFreeShipping(): bool
+    {
+        return $this->type === PromotionType::FREE_SHIPPING;
+    }
 }

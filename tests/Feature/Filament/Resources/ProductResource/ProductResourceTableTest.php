@@ -60,7 +60,6 @@ it('can sort column', function (string $column) {
     'sale_price',
     'is_active',
     'is_featured',
-    'total_quantity',
     'created_at',
     'updated_at'
 ]);

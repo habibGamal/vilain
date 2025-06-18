@@ -1,18 +1,20 @@
 import { Head } from "@inertiajs/react";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
+import { resolveStoragePath } from "@/utils/storageUtils";
 import { Card } from "@/Components/ui/card";
 import { Image } from "@/Components/ui/Image";
 import { Award, ShoppingBag } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import EmptyState from "@/Components/ui/empty-state";
 import { cn } from "@/lib/utils";
+import { App } from "@/types";
 
 interface BrandsPageProps {
     brands: App.Models.Brand[];
 }
 
 export default function Index({ brands }: BrandsPageProps) {
-    const { t, getLocalizedField } = useLanguage();
+    const { t, getLocalizedField } = useI18n();
 
     // Function to determine if a brand should be featured (larger size)
     const isFeatureBrand = (index: number) => {
@@ -46,10 +48,10 @@ export default function Index({ brands }: BrandsPageProps) {
                                 className="block h-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             >
                                 <div className="relative h-full bg-background group-hover:bg-muted/10">
-                                    {brand.image ? (
+                                    {(brand.display_image || brand.image) ? (
                                         <div className="relative w-full h-full">
                                             <Image
-                                                src={brand.image}
+                                                src={resolveStoragePath(brand.display_image || brand.image) || ''}
                                                 alt={getLocalizedField(
                                                     brand,
                                                     "name"

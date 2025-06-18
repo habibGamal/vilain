@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\CartItem;
+use App\Services\CartItemResolverService;
 use App\Services\CartService;
 use App\Models\Product;
-use CartItemResolverService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -112,7 +112,6 @@ class CartController extends Controller
      */
     public function removeItem(CartItem $cartItem)
     {
-
         // Validate that the cart item belongs to the current user's cart
         if ($cartItem->cart->user_id !== Auth::id()) {
             return response()->json([

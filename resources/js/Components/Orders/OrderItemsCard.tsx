@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Card, CardContent } from "@/Components/ui/card";
 import { OrderItemsList } from "./OrderItemsList";
 import { OrderSummary } from "./OrderSummary";

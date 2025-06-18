@@ -22,14 +22,28 @@ class SearchController extends Controller
             return response()->json(['suggestions' => []]);
         }
 
-        $suggestions = Product::where('name_en', 'LIKE', "%{$query}%")
-            ->orWhere('name_ar', 'LIKE', "%{$query}%")
-            ->select('id', 'name_en', 'name_ar', 'slug', 'price','image')
+        // Use TNTSearch for better search results
+        $suggestions = Product::search($query)
             ->where('is_active', true)
             ->take(5)
-            ->get();
+            ->get()
+            ->load(['brand:id,name_en,name_ar', 'category:id,name_en,name_ar']);
 
-        return response()->json(['suggestions' => $suggestions]);
+        // Format the suggestions for the frontend
+        $formattedSuggestions = $suggestions->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name_en' => $product->name_en,
+                'name_ar' => $product->name_ar,
+                'slug' => $product->slug,
+                'price' => $product->price,
+                'featured_image' => $product->featured_image,
+                'brand' => $product->brand,
+                'category' => $product->category,
+            ];
+        });
+
+        return response()->json(['suggestions' => $formattedSuggestions]);
     }
 
     /**

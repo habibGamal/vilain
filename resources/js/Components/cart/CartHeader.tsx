@@ -1,11 +1,11 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 
 interface CartHeaderProps {
   totalItems: number;
 }
 
 export function CartHeader({ totalItems }: CartHeaderProps) {
-  const { t } = useLanguage();
+  const { t } = useI18n();
 
   return (
     <div>

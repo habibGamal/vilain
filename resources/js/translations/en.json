@@ -112,7 +112,6 @@
     "placing_order": "Placing Order...",
     "order_terms": "By placing this order, you agree to our Terms and Conditions",
 
-    "my_orders": "My Orders",
     "no_orders_yet": "No Orders Yet",
     "no_orders_description": "You haven't placed any orders yet. Start shopping to place your first order!",
     "start_shopping": "Start Shopping",
@@ -151,6 +150,8 @@
     "shipping": "Shipping",
     "discount": "Discount",
     "cancel_order": "Cancel Order",
+    "complete_payment": "Complete Payment",
+    "complete_your_payment": "Complete Your Payment",
     "confirm_cancel_order": "Are you sure you want to cancel this order?",
     "cancellation_policy_title": "Cancellation Policy",
     "cancellation_policy_desc": "You can cancel your order while it's still in the processing stage. Once the order status changes to 'Shipped', it can no longer be cancelled.",
@@ -166,10 +167,13 @@
     "search_results": "Search Results",
     "results_for": "Results for: '{{query}}'",
     "view_all_results": "View all results",
+    "view_all_results_for": "View all results for '{{query}}'",
+    "searching": "Searching...",
     "no_results": "No results found",
     "no_results_found": "No results found",
     "try_different_search": "Try a different search term",
     "try_different_keywords": "Try different keywords or check your spelling",
+    "clear": "Clear",
 
     "filters": "Filters",
     "filter_description": "Filter products by brand, category or price range",
@@ -233,5 +237,23 @@
     "payment_failed": "Payment Failed",
     "payment_verification_failed": "Payment verification failed",
     "try_again": "Please try again or use a different payment method",
-    "payment_contact_support": "If the issue persists, please contact our support team."
+    "payment_contact_support": "If the issue persists, please contact our support team.",
+
+    "coupon_code": "Coupon Code",
+    "enter_coupon_code": "Enter coupon code",
+    "removing": "Removing...",
+    "remove": "Remove",
+    "applying": "Applying...",
+    "apply": "Apply",
+    "promotion_applied": "Promotion Applied Successfully!",
+    "code": "Code",
+    "saving": "Saving",
+
+    "address_required": "Address Required",
+    "select_address_first": "Please select an address first",
+    "coupon_required": "Coupon Code Required",
+    "invalid_coupon_code": "Invalid coupon code. Please check and try again.",
+    "coupon_error": "Failed to apply coupon code. Please try again.",
+
+    "notes_placeholder": "Add any special instructions or notes for your order..."
 }

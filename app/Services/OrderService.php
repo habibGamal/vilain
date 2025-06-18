@@ -2,150 +2,88 @@
 
 namespace App\Services;
 
+use App\DTOs\OrderPlacementData;
+use App\DTOs\OrderEvaluationData;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Enums\PromotionType;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Address;
 use App\Models\ShippingCost;
 use App\Models\Promotion;
-use App\Enums\PromotionType;
+use App\Services\InventoryManagementService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Exception;
 
 class OrderService
 {
     protected CartService $cartService;
-    protected PromotionService $promotionService;
+    protected OrderEvaluationService $orderEvaluationService;
+    protected InventoryManagementService $inventoryService;
 
     /**
      * Create a new service instance.
      *
      * @param CartService $cartService
-     * @param PromotionService $promotionService
+     * @param OrderEvaluationService $orderEvaluationService
+     * @param InventoryManagementService $inventoryService
      */
-    public function __construct(CartService $cartService, PromotionService $promotionService)
-    {
+    public function __construct(
+        CartService $cartService,
+        OrderEvaluationService $orderEvaluationService,
+        InventoryManagementService $inventoryService
+    ) {
         $this->cartService = $cartService;
-        $this->promotionService = $promotionService;
+        $this->orderEvaluationService = $orderEvaluationService;
+        $this->inventoryService = $inventoryService;
     }
 
     /**
      * Place a new order from the user's cart
      *
-     * @param int $addressId The shipping address ID
-     * @param string $paymentMethod The payment method used
-     * @param string|null $couponCode Optional coupon code
-     * @param string|null $notes Optional order notes
-     * @param string|null $paymentId Optional payment ID from payment gateway
-     * @param array|null $paymentDetails Optional payment details from payment gateway
-     * @param PaymentStatus|null $paymentStatus Optional payment status, defaults to PENDING
+     * @param OrderPlacementData $orderData The data for placing an order
      *
      * @return Order The created order
      * @throws ModelNotFoundException If the address doesn't exist
-     * @throws \Exception If there was an error processing the order
+     * @throws Exception If there was an error processing the order
      */
-    public function placeOrderFromCart(
-        int $addressId,
-        string $paymentMethod,
-        ?string $couponCode = null,
-        ?string $notes = null,
-        ?string $paymentId = null,
-        ?array $paymentDetails = null,
-        ?PaymentStatus $paymentStatus = null,
-        ?int $promotionId = null
-    ): Order
+    public function placeOrderFromCart(OrderPlacementData $orderData): Order
     {
-        // Get the user and validate they exist
-        $user = Auth::user();
-        if (!$user) {
-            throw new \Exception('User must be authenticated to place an order');
-        }
+        $user = $this->getAuthenticatedUser();
+        $this->validateCartNotEmpty();
 
-        // Calculate order totals and get address
-        $orderData = $this->calculateOrderTotal($addressId, $couponCode, $promotionId);
-        $address = $orderData['address'];
-        $appliedPromotion = $orderData['appliedPromotion'] ?? null;
-
-        // Get the cart with all its items
-        $cart = $this->cartService->getCart();
-
-        // Check if cart is empty
-        if ($cart->items->isEmpty()) {
-            throw new \Exception('Cannot place an order with an empty cart');
-        }
-
-        // Set default payment status if not provided
-        if ($paymentStatus === null) {
-            $paymentStatus = PaymentStatus::PENDING;
-        }
+        // Calculate order totals and get address using the OrderEvaluationService
+        $orderEvaluation = $this->orderEvaluationService->evaluateOrderCalculation(
+            $orderData->addressId,
+            $orderData->couponCode,
+            $orderData->promotionId
+        );
 
         // Begin a transaction to ensure data consistency
         return DB::transaction(function () use (
             $user,
-            $address,
-            $cart,
+            $orderEvaluation,
             $orderData,
-            $paymentMethod,
-            $couponCode,
-            $notes,
-            $paymentId,
-            $paymentDetails,
-            $paymentStatus,
-            $appliedPromotion
         ) {
-
             // Create the order
-            $order = Order::create([
-                'user_id' => $user->id,
-                'order_status' => OrderStatus::PROCESSING,
-                'payment_status' => $paymentStatus,
-                'payment_method' => PaymentMethod::from($paymentMethod),
-                'subtotal' => $orderData['subtotal'],
-                'shipping_cost' => $orderData['shippingCost'],
-                'discount' => $orderData['discount'],
-                'total' => $orderData['total'],
-                'coupon_code' => $couponCode,
-                'promotion_id' => $appliedPromotion ? $appliedPromotion->id : null,
-                'shipping_address_id' => $address->id,
-                'notes' => $notes,
-                'payment_id' => $paymentId,
-                'payment_details' => $paymentDetails ? json_encode($paymentDetails) : null,
-            ]);
+            $order = $this->createOrderRecord(
+                $user,
+                $orderEvaluation->address,
+                $orderEvaluation,
+                $orderData,
+                $orderEvaluation->appliedPromotion
+            );
 
-            // Create the order items from cart items
-            foreach ($cart->items as $cartItem) {
-                $product = $cartItem->product;
-                $variant = $cartItem->variant;
+            // Create the order items from cart items using CartService
+            $this->cartService->toOrderItems($order);
 
-                // Determine the actual price (use variant price if available, otherwise product price)
-                $unitPrice = $variant && $variant->price ? $variant->price : $product->price;
-
-                // Check for sale price
-                if ($variant && $variant->sale_price) {
-                    $unitPrice = $variant->sale_price;
-                } elseif ($product->sale_price) {
-                    $unitPrice = $product->sale_price;
-                }
-
-                // Create order item
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $cartItem->product_id,
-                    'variant_id' => $cartItem->product_variant_id,
-                    'quantity' => $cartItem->quantity,
-                    'unit_price' => $unitPrice,
-                    'subtotal' => $unitPrice * $cartItem->quantity,
-                ]);
-
-                // Update product inventory (if needed)
-                if ($variant) {
-                    $variant->quantity -= $cartItem->quantity;
-                    $variant->save();
-                }
-            }
             // Clear the cart after successful order creation
             $this->cartService->clearCart();
 
@@ -155,111 +93,38 @@ class OrderService
     }
 
     /**
-     * Calculate the total for an order based on address and optional coupon
+     * Create the order record in the database
      *
-     * @param int $addressId The shipping address ID
-     * @param string|null $couponCode Optional coupon code
-     * @return array Order calculation result with subtotal, shipping, discount and total
-     * @throws ModelNotFoundException If the address doesn't exist
-     * @throws \Exception If there was an error calculating the order
+     * @param mixed $user The authenticated user
+     * @param Address $address The shipping address
+     * @param OrderEvaluationData $orderEvaluation The order calculation results
+     * @param OrderPlacementData $orderData The order placement data
+     * @param Promotion|null $appliedPromotion The applied promotion
+     * @return Order The created order
      */
-    public function calculateOrderTotal(
-        int $addressId,
-        ?string $couponCode = null,
-        ?int $promotionId = null
-    ): array
-    {
-        // Get the user and validate they exist
-        $user = Auth::user();
-        if (!$user) {
-            throw new \Exception('User must be authenticated to calculate an order');
-        }
-
-        // Get the shipping address and validate it exists
-        $address = Address::where('user_id', $user->id)
-                         ->findOrFail($addressId);
-
-        // Get the cart with all its items
-        $cart = $this->cartService->getCart();
-
-        // Check if cart is empty
-        if ($cart->items->isEmpty()) {
-            throw new \Exception('Cannot calculate order with an empty cart');
-        }
-
-        // Calculate shipping cost based on the address area
-        $shippingCost = ShippingCost::where('area_id', $address->area_id)
-                                   ->first();
-
-        if (!$shippingCost) {
-            throw new \Exception('No shipping cost found for the provided area');
-        }
-
-        // Get the cart totals
-        $cartSummary = $this->cartService->getCartSummary();
-        $subtotal = $cartSummary['totalPrice'];
-
-        // Initialize discount and appliedPromotion
-        $discount = 0;
-        $appliedPromotion = null;
-        $shippingDiscount = false;
-
-        // Check for promotion code
-        if ($couponCode) {
-            $promotionResult = $this->promotionService->validatePromotionCode($couponCode);
-            if ($promotionResult) {
-                [$discountAmount, $promotion] = $promotionResult;
-                $discount = $discountAmount;
-                $appliedPromotion = $promotion;
-
-                if ($promotion->type === PromotionType::FREE_SHIPPING) {
-                    $shippingDiscount = true;
-                }
-            }
-        }
-        // If no coupon provided, check for specific promotion by ID
-        elseif ($promotionId) {
-            $promotion = Promotion::with(['conditions', 'rewards'])->find($promotionId);
-            if ($promotion && $promotion->is_active) {
-                $discountAmount = $this->promotionService->calculateDiscountAmount($promotion, $cart);
-                if ($discountAmount > 0) {
-                    $discount = $discountAmount;
-                    $appliedPromotion = $promotion;
-
-                    if ($promotion->type === PromotionType::FREE_SHIPPING) {
-                        $shippingDiscount = true;
-                    }
-                }
-            }
-        }
-        // If no specific promotion provided, try to find the best automatic one
-        else {
-            $automaticPromotionResult = $this->promotionService->applyBestAutomaticPromotion($cart);
-            if ($automaticPromotionResult) {
-                [$discountAmount, $promotion] = $automaticPromotionResult;
-                $discount = $discountAmount;
-                $appliedPromotion = $promotion;
-
-                if ($promotion->type === PromotionType::FREE_SHIPPING) {
-                    $shippingDiscount = true;
-                }
-            }
-        }
-
-        // Apply shipping discount if applicable
-        $finalShippingCost = $shippingDiscount ? 0 : $shippingCost->value;
-
-        // Calculate the total price
-        $total = $subtotal + $finalShippingCost - $discount;
-
-        return [
-            'subtotal' => $subtotal,
-            'shippingCost' => $finalShippingCost,
-            'discount' => $discount,
-            'total' => $total,
-            'address' => $address,
-            'appliedPromotion' => $appliedPromotion,
+    protected function createOrderRecord(
+        $user,
+        Address $address,
+        OrderEvaluationData $orderEvaluation,
+        OrderPlacementData $orderData,
+        ?Promotion $appliedPromotion = null
+    ): Order {
+        $orderAttributes = [
+            'user_id' => $user->id,
+            'order_status' => OrderStatus::PROCESSING,
+            'payment_status' => PaymentStatus::PENDING,
+            'payment_method' => $orderData->paymentMethod,
+            'subtotal' => $orderEvaluation->subtotal,
+            'shipping_cost' => $orderEvaluation->finalShippingCost,
+            'discount' => $orderEvaluation->discount,
+            'total' => $orderEvaluation->total,
+            'coupon_code' => $orderData->couponCode,
+            'promotion_id' => $appliedPromotion ? $appliedPromotion->id : null,
+            'shipping_address_id' => $address->id,
+            'notes' => $orderData->notes,
         ];
+
+        return Order::create($orderAttributes);
     }
 
     /**
@@ -271,61 +136,60 @@ class OrderService
      */
     public function getOrderById(int $orderId): Order
     {
-        $user = Auth::user();
+        $user = $this->getAuthenticatedUser();
 
         return Order::where('user_id', $user->id)
-                   ->with(['items.product', 'items.variant', 'shippingAddress.area.gov'])
-                   ->findOrFail($orderId);
+            ->with(['items.product', 'items.variant', 'shippingAddress.area.gov'])
+            ->findOrFail($orderId);
     }
 
     /**
      * Get all orders for the current user
      *
      * @param int|null $limit Optional limit for pagination
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return LengthAwarePaginator
      */
-    public function getUserOrders(?int $limit = 10)
+    public function getUserOrders(?int $limit = 10): LengthAwarePaginator
     {
-        $user = Auth::user();
+        $user = $this->getAuthenticatedUser();
 
         return Order::where('user_id', $user->id)
-                   ->with(['items'])
-                   ->orderBy('created_at', 'desc')
-                   ->paginate($limit);
+            ->with(['items'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($limit);
     }
 
     /**
-     * Cancel an order
+     * Get authenticated user or throw exception
      *
-     * @param int $orderId
-     * @return Order
-     * @throws ModelNotFoundException If the order doesn't exist
-     * @throws \Exception If the order cannot be cancelled
+     * @return mixed The authenticated user
+     * @throws Exception If user is not authenticated
      */
-    public function cancelOrder(int $orderId): Order
+    protected function getAuthenticatedUser()
     {
         $user = Auth::user();
 
-        $order = Order::where('user_id', $user->id)->findOrFail($orderId);
-
-        // Check if the order can be cancelled
-        if ($order->order_status !== OrderStatus::PROCESSING) {
-            throw new \Exception('Only orders in processing status can be cancelled');
+        if (!$user) {
+            throw new Exception('User must be authenticated to perform this action');
         }
 
-        // Update order status
-        $order->order_status = OrderStatus::CANCELLED;
-        $order->save();
+        return $user;
+    }
 
-        // Return inventory to stock
-        foreach ($order->items as $item) {
-            if ($item->variant_id) {
-                $variant = $item->variant;
-                $variant->quantity += $item->quantity;
-                $variant->save();
-            }
+    /**
+     * Validate that the cart is not empty
+     *
+     * @return mixed The cart
+     * @throws Exception If cart is empty
+     */
+    protected function validateCartNotEmpty()
+    {
+        $cart = $this->cartService->getCart();
+
+        if ($cart->items->isEmpty()) {
+            throw new Exception('Cannot perform this action with an empty cart');
         }
 
-        return $order->fresh();
+        return $cart;
     }
 }

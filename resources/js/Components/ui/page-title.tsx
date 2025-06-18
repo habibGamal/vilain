@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Button } from "@/Components/ui/button";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Link } from "@inertiajs/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -21,7 +21,7 @@ export function PageTitle({
     actions,
     className = "",
 }: PageTitleProps) {
-    const { t, direction } = useLanguage();
+    const { t, direction } = useI18n();
     const ArrowIcon = direction === "rtl" ? ArrowRight : ArrowLeft;
 
     return (

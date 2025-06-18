@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import { Separator } from "@/Components/ui/separator";
 import { ScrollArea } from "@/Components/ui/scroll-area";
@@ -10,7 +10,7 @@ interface ProductDescriptionProps {
 export default function ProductDescription({
     product,
 }: ProductDescriptionProps) {
-    const { getLocalizedField, t, direction } = useLanguage();
+    const { getLocalizedField, t, direction } = useI18n();
 
     const description = getLocalizedField(product, "description");
 

@@ -1,15 +1,13 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
-import { Head, Link } from "@inertiajs/react";
-import { ShoppingBag } from "lucide-react";
-import EmptyState from "@/Components/ui/empty-state";
+import ItemGrid from "@/Components/ItemGrid";
+import { Badge } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import { Badge } from "@/Components/ui/badge";
-import { formatDate } from "@/lib/utils";
-import MainLayout from "@/Layouts/MainLayout";
-import { App } from "@/types";
-import ItemGrid from "@/Components/ItemGrid";
 import { PageTitle } from "@/Components/ui/page-title";
+import { useI18n } from "@/hooks/use-i18n";
+import { formatDate } from "@/lib/utils";
+import { App } from "@/types";
+import { Head, Link } from "@inertiajs/react";
+import { CreditCard, ShoppingBag } from "lucide-react";
 
 interface OrdersIndexProps extends App.Interfaces.AppPageProps {
     orders: {
@@ -38,7 +36,7 @@ interface OrdersIndexProps extends App.Interfaces.AppPageProps {
 }
 
 export default function Index() {
-    const { t, getLocalizedField } = useLanguage();
+    const { t, getLocalizedField } = useI18n();
 
     // Helper function to get appropriate status badge color
     const getStatusBadgeColor = (status: App.Models.OrderStatus) => {
@@ -54,6 +52,27 @@ export default function Index() {
             default:
                 return "bg-gray-100 text-gray-800 dark:bg-gray-800/30 dark:text-gray-500";
         }
+    };
+
+    // Helper function to get appropriate payment status badge color
+    const getPaymentStatusBadgeColor = (status: App.Models.PaymentStatus) => {
+        switch (status) {
+            case "paid":
+                return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500";
+            case "pending":
+                return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500";
+            default:
+                return "bg-gray-100 text-gray-800 dark:bg-gray-800/30 dark:text-gray-500";
+        }
+    };
+
+    // Check if payment needs to be completed (for non-COD orders that are pending payment)
+    const needsPayment = (order: App.Models.Order) => {
+        return (
+            order.payment_method !== "cash_on_delivery" &&
+            order.payment_status === "pending" &&
+            order.order_status !== "cancelled"
+        );
     };
 
     return (
@@ -79,7 +98,7 @@ export default function Index() {
                                     <CardTitle className="text-base font-medium">
                                         {t("order_number", "Order")} #{order.id}
                                     </CardTitle>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                                         <span>
                                             {formatDate(order.created_at)}
                                         </span>
@@ -95,6 +114,17 @@ export default function Index() {
                                             {t(
                                                 `order_status_${order.order_status}`,
                                                 order.order_status
+                                            )}
+                                        </Badge>
+                                        <Badge
+                                            variant="outline"
+                                            className={getPaymentStatusBadgeColor(
+                                                order.payment_status
+                                            )}
+                                        >
+                                            {t(
+                                                `payment_status_${order.payment_status}`,
+                                                order.payment_status
                                             )}
                                         </Badge>
                                     </div>
@@ -136,7 +166,27 @@ export default function Index() {
                                             )}
                                         </p>
                                     </div>
-                                    <div>
+                                    <div className="flex gap-2">
+                                        {needsPayment(order) && (
+                                            <Button
+                                                asChild
+                                                className="flex items-center gap-1"
+                                                variant="default"
+                                            >
+                                                <Link
+                                                    href={route(
+                                                        "kashier.payment.show",
+                                                        order.id
+                                                    )}
+                                                >
+                                                    <CreditCard className="h-4 w-4" />
+                                                    {t(
+                                                        "complete_payment",
+                                                        "Complete Payment"
+                                                    )}
+                                                </Link>
+                                            </Button>
+                                        )}
                                         <Button asChild variant="outline">
                                             <Link
                                                 href={route(

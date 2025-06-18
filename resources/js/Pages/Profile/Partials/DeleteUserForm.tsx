@@ -1,8 +1,8 @@
 import { useForm as useInertiaForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Button } from "@/Components/ui/button";
+import { Input } from "@/Components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/Components/ui/form";
 import {
     Dialog,
     DialogContent,
@@ -10,11 +10,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter
-} from "@/components/ui/dialog";
+} from "@/Components/ui/dialog";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useLanguage } from '@/Contexts/LanguageContext';
+import { useI18n } from '@/hooks/use-i18n';
 
 export default function DeleteUserForm({
     className = '',
@@ -23,7 +23,7 @@ export default function DeleteUserForm({
 }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
     const passwordInput = useRef<HTMLInputElement>(null);
-    const { t } = useLanguage();
+    const { t } = useI18n();
 
     // Form validation schema
     const formSchema = z.object({
@@ -126,11 +126,15 @@ export default function DeleteUserForm({
                                             <Input
                                                 id="password"
                                                 type="password"
-                                                ref={passwordInput}
                                                 className="w-full"
                                                 autoFocus
                                                 placeholder={t('password', 'Password')}
                                                 {...field}
+                                                ref={(e) => {
+                                                    field.ref(e);
+                                                    // @ts-ignore - set ref for both field and passwordInput
+                                                    passwordInput.current = e;
+                                                }}
                                             />
                                         </FormControl>
                                         <FormMessage />

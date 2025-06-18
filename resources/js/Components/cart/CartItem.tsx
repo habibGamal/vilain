@@ -1,7 +1,7 @@
 import { Button } from "@/Components/ui/button";
 import { Card } from "@/Components/ui/card";
 import { Image } from "@/Components/ui/Image";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Trash2, MinusCircle, PlusCircle } from "lucide-react";
 import { Badge } from "@/Components/ui/badge";
 import { App } from "@/types";
@@ -21,7 +21,7 @@ export function CartItem({
     removeCartItem,
     calculateItemTotal,
 }: CartItemProps) {
-    const { t ,getLocalizedField } = useLanguage();
+    const { t ,getLocalizedField } = useI18n();
 
     return (
         <Card className="overflow-hidden">

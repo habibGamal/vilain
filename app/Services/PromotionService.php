@@ -25,17 +25,16 @@ class PromotionService
     {
         $promotion = Promotion::where('code', $code)
             ->where('is_active', true)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('starts_at')
                     ->orWhere('starts_at', '<=', now());
             })
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>=', now());
             })
             ->with(['conditions', 'rewards'])
             ->first();
-
         if (!$promotion) {
             return null;
         }
@@ -58,9 +57,18 @@ class PromotionService
 
         // Calculate discount amount
         $discountAmount = $this->calculateDiscountAmount($promotion, $cart);
+
+        // Handle free shipping promotions specially
+        if ($promotion->type === PromotionType::FREE_SHIPPING) {
+            // For free shipping promotions, we don't return a monetary discount
+            // The shipping discount will be handled separately
+            return [0, $promotion];
+        }
+
         if ($discountAmount <= 0) {
             return null;
         }
+
 
         return [$discountAmount, $promotion];
     }
@@ -76,8 +84,7 @@ class PromotionService
     {
         $cartService = app(CartService::class);
         $cartSummary = $cartService->getCartSummary();
-        $subtotal = $cartSummary['totalPrice'];
-
+        $subtotal = $cartSummary->totalPrice;
         // Check minimum order value
         if ($promotion->min_order_value !== null && $subtotal < $promotion->min_order_value) {
             return 0;
@@ -87,7 +94,6 @@ class PromotionService
         if (!$this->checkPromotionConditions($promotion, $cart)) {
             return 0;
         }
-
         switch ($promotion->type) {
             case PromotionType::PERCENTAGE:
                 return $subtotal * ($promotion->value / 100);
@@ -119,30 +125,29 @@ class PromotionService
         if ($promotion->conditions->isEmpty()) {
             return true;
         }
-
         // Group conditions by type
         $conditionsByType = $promotion->conditions->groupBy('type');
 
         foreach ($conditionsByType as $type => $conditions) {
             $conditionMet = false;
-
             switch ($type) {
-                case PromotionConditionType::PRODUCT:
+                case PromotionConditionType::PRODUCT->value:
                     $conditionMet = $this->checkProductConditions($conditions, $cart);
                     break;
 
-                case PromotionConditionType::CATEGORY:
+                case PromotionConditionType::CATEGORY->value:
                     $conditionMet = $this->checkCategoryConditions($conditions, $cart);
                     break;
 
-                case PromotionConditionType::BRAND:
+                case PromotionConditionType::BRAND->value:
                     $conditionMet = $this->checkBrandConditions($conditions, $cart);
                     break;
 
-                case PromotionConditionType::CUSTOMER:
+                case PromotionConditionType::CUSTOMER->value:
                     $conditionMet = $this->checkCustomerConditions($conditions);
                     break;
             }
+
 
             if (!$conditionMet) {
                 return false;
@@ -367,7 +372,8 @@ class PromotionService
         });
 
         foreach ($sortedItems as $item) {
-            if ($remainingQuantity <= 0) break;
+            if ($remainingQuantity <= 0)
+                break;
 
             $productPrice = $item->product->sale_price ?? $item->product->price;
             if ($item->variant && $item->variant->price) {
@@ -413,7 +419,8 @@ class PromotionService
         });
 
         foreach ($sortedItems as $item) {
-            if ($remainingQuantity <= 0) break;
+            if ($remainingQuantity <= 0)
+                break;
 
             $productPrice = $item->product->sale_price ?? $item->product->price;
             if ($item->variant && $item->variant->price) {
@@ -459,11 +466,11 @@ class PromotionService
     public function getEligiblePromotions(Cart $cart): Collection
     {
         $promotions = Promotion::where('is_active', true)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('starts_at')
                     ->orWhere('starts_at', '<=', now());
             })
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>=', now());
             })
@@ -471,7 +478,7 @@ class PromotionService
             ->with(['conditions', 'rewards'])
             ->get();
 
-        return $promotions->filter(function($promotion) use ($cart) {
+        return $promotions->filter(function ($promotion) use ($cart) {
             $discountAmount = $this->calculateDiscountAmount($promotion, $cart);
             return $discountAmount > 0;
         });

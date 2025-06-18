@@ -1,10 +1,12 @@
 import { Card } from "@/Components/ui/card";
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
+import { resolveStoragePath } from "@/utils/storageUtils";
 import { cn } from "@/lib/utils";
 import { Link } from "@inertiajs/react";
 import { ArrowLeft, ArrowRight, Award, ShoppingBag } from "lucide-react";
 import EmptyState from "./ui/empty-state";
 import { Image } from "./ui/Image";
+import { App } from "@/types";
 
 interface BrandGridProps {
     brands: App.Models.Brand[];
@@ -12,7 +14,7 @@ interface BrandGridProps {
 }
 
 export default function BrandGrid({ brands, title }: BrandGridProps) {
-    const { t, getLocalizedField,direction } = useLanguage();
+    const { t, getLocalizedField,direction } = useI18n();
 
     // Function to determine if a brand should be featured (larger size)
     const isFeatureBrand = (index: number) => {
@@ -57,10 +59,10 @@ export default function BrandGrid({ brands, title }: BrandGridProps) {
                                 className="block h-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             >
                                 <div className="relative h-full bg-background group-hover:bg-muted/10">
-                                    {brand.image ? (
+                                    {(brand.display_image || brand.image) ? (
                                         <div className="relative w-full h-full">
                                             <Image
-                                                src={brand.image}
+                                                src={resolveStoragePath(brand.display_image || brand.image) || ''}
                                                 alt={getLocalizedField(
                                                     brand,
                                                     "name"

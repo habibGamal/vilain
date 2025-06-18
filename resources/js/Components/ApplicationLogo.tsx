@@ -1,16 +1,16 @@
-import { Image } from '@/Components/ui/Image';
+import { SiteLogo } from '@/Components/Settings/SettingsComponents';
 
 interface ApplicationLogoProps {
     className?: string;
+    showTitle?: boolean;
 }
 
-export default function ApplicationLogo({ className }: ApplicationLogoProps) {
+export default function ApplicationLogo({ className, showTitle = false }: ApplicationLogoProps) {
     return (
-        <Image
-            src="/logo.jpg"
-            alt="Logo"
-            className={`h-8 w-auto ${className || ''}`}
-            useDefaultFallback={true}
+        <SiteLogo
+            className={className}
+            size="md"
+            showTitle={showTitle}
         />
     );
 }

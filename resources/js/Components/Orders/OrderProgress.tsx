@@ -1,4 +1,4 @@
-import { useLanguage } from "@/Contexts/LanguageContext";
+import { useI18n } from "@/hooks/use-i18n";
 import { Progress } from "@/Components/ui/progress";
 import { Clock, Truck, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ interface OrderProgressProps {
 }
 
 export function OrderProgress({ order }: OrderProgressProps) {
-    const { t ,direction} = useLanguage();
+    const { t ,direction} = useI18n();
 
     // Define order status steps
     const orderStatuses = ["processing", "shipped", "delivered"];
