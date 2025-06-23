@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSiteBranding, useSettings } from '@/hooks/useSettings';
 import { resolveStoragePath } from '@/utils/storageUtils';
+import { Facebook, X, Instagram, Linkedin, Youtube, Music2 } from 'lucide-react';
 
 interface SiteLogoProps {
     className?: string;
@@ -95,15 +96,14 @@ interface SocialLinksProps {
  */
 export function SocialLinks({ className = '', iconSize = 24, showLabels = false }: SocialLinksProps) {
     const settings = useSettings();
-    const socialLinks = settings.social_links || {};
-
+    const socialLinks = JSON.parse(settings.social_links || "{}");
     const socialPlatforms = [
-        { key: 'facebook', label: 'Facebook', icon: '📘' },
-        { key: 'twitter', label: 'Twitter', icon: '🐦' },
-        { key: 'instagram', label: 'Instagram', icon: '📷' },
-        { key: 'linkedin', label: 'LinkedIn', icon: '💼' },
-        { key: 'youtube', label: 'YouTube', icon: '📺' },
-        { key: 'tiktok', label: 'TikTok', icon: '🎵' },
+        { key: 'facebook', label: 'Facebook', icon: Facebook },
+        { key: 'twitter', label: 'X (Twitter)', icon: X },
+        { key: 'instagram', label: 'Instagram', icon: Instagram },
+        { key: 'linkedin', label: 'LinkedIn', icon: Linkedin },
+        { key: 'youtube', label: 'YouTube', icon: Youtube },
+        { key: 'tiktok', label: 'TikTok', icon: Music2 },
     ];
 
     const activePlatforms = socialPlatforms.filter(platform =>
@@ -116,24 +116,27 @@ export function SocialLinks({ className = '', iconSize = 24, showLabels = false 
 
     return (
         <div className={`flex gap-3 ${className}`}>
-            {activePlatforms.map((platform) => (
-                <a
-                    key={platform.key}
-                    href={socialLinks[platform.key]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                    {showLabels ? (
-                        <span className="flex items-center gap-2">
-                            <span style={{ fontSize: iconSize }}>{platform.icon}</span>
-                            {platform.label}
-                        </span>
-                    ) : (
-                        <span style={{ fontSize: iconSize }}>{platform.icon}</span>
-                    )}
-                </a>
-            ))}
+            {activePlatforms.map((platform) => {
+                const IconComponent = platform.icon;
+                return (
+                    <a
+                        key={platform.key}
+                        href={socialLinks[platform.key]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        {showLabels ? (
+                            <span className="flex items-center gap-2">
+                                <IconComponent size={iconSize} />
+                                {platform.label}
+                            </span>
+                        ) : (
+                            <IconComponent size={iconSize} />
+                        )}
+                    </a>
+                );
+            })}
         </div>
     );
 }

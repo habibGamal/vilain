@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatus;
 use App\Enums\SectionType;
 use App\Models\Product;
 use App\Models\Section;
@@ -233,6 +234,7 @@ class SectionService
             'Featured Products' => $this->getFeaturedProductsSectionQuery(),
             'Products On Sale' => $this->getOnSaleProductsSectionQuery(),
             'New Arrivals' => $this->getNewProductsSectionQuery(),
+            'Best Sellers' => $this->getBestSellersProductsSectionQuery(),
             'Recommended For You' => $this->getRecommendedProductsSectionQuery(),
             default => Product::forCards(),
         };
@@ -269,6 +271,29 @@ class SectionService
     {
         return Product::forCards()
             ->whereNotNull('sale_price');
+    }
+
+    /**
+     * Get query for best selling products (ordered by total sales quantity)
+     *
+     * @return Builder
+     */
+    protected function getBestSellersProductsSectionQuery(): Builder
+    {
+        // Create a subquery to get product sales totals
+        $salesSubquery = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.order_status', OrderStatus::DELIVERED->value)
+            ->select('order_items.product_id', DB::raw('SUM(order_items.quantity) as total_sold'))
+            ->groupBy('order_items.product_id');
+
+        // Join with the subquery and order by sales
+        return Product::forCards()
+            ->leftJoinSub($salesSubquery, 'sales', function ($join) {
+                $join->on('products.id', '=', 'sales.product_id');
+            })
+            ->select('products.*', DB::raw('COALESCE(sales.total_sold, 0) as total_sold'))
+            ->orderBy('total_sold', 'desc');
     }
 
     /**

@@ -11,8 +11,9 @@ interface ProductInfoProps {
 export default function ProductInfo({ product }: ProductInfoProps) {
     const { getLocalizedField, t } = useI18n();
     const isInStock = product.isInStock;
-    const discountPercentage = product.sale_price
-        ? Math.round(((product.price - product.sale_price) / product.price) * 100)
+    const hasDiscount = product.sale_price && product.sale_price !== product.price;
+    const discountPercentage = hasDiscount
+        ? Math.round(((product.price - product.sale_price!) / product.price) * 100)
         : 0;
     console.log(product)
     return (
@@ -23,8 +24,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     href={`/search?brands[]=${product.brand.id}`}
                     className="w-fit mb-3"
                 >
-                    <Badge 
-                        variant="outline" 
+                    <Badge
+                        variant="outline"
                         className="hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
                     >
                         {getLocalizedField(product.brand, "name")}
@@ -39,7 +40,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
             {/* Price */}
             <div className="flex items-center gap-3 mb-6">
-                {product.sale_price ? (
+                {hasDiscount ? (
                     <>
                         <span className="text-2xl md:text-3xl font-bold">
                             {product.sale_price} EGP

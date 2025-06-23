@@ -265,8 +265,8 @@ describe('toOrderItem', function () {
 
         $orderItem = $this->service->toOrderItem($cartItem, $this->order);
 
-        expect((float) $orderItem->unit_price)->toBe(85.00);
-        expect((float) $orderItem->subtotal)->toBe(85.00);
+        expect((float) $orderItem->unit_price)->toBe(80.00);
+        expect((float) $orderItem->subtotal)->toBe(80.00);
     });
 
     it('throws exception when cart item has no variant', function () {

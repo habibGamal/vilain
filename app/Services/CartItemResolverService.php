@@ -169,15 +169,7 @@ class CartItemResolverService
             }
         }
 
-        // Determine the actual price (use variant price if available, otherwise product price)
-        $unitPrice = $variant->price ?: $product->price;
-
-        // Check for sale price (variant sale price takes precedence)
-        if ($variant->sale_price) {
-            $unitPrice = $variant->sale_price;
-        } elseif ($product->sale_price) {
-            $unitPrice = $product->sale_price;
-        }
+        $unitPrice = $cartItem->getUnitPrice();
 
         // Create the order item
         $orderItem = $order->items()->create([

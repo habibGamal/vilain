@@ -93,7 +93,7 @@ export default function HeroCarousel({ heroSlides }: HeroCarouselProps) {
 
                             {/* Desktop and Tablet Layout */}
                             <div className="hidden md:block">
-                                <div className="relative aspect-[21/9] md:aspect-[16/9] lg:aspect-[21/9] overflow-hidden rounded-xl">
+                                <div className="relative aspect-[16/9] overflow-hidden rounded-xl">
                                     <Image
                                         src={slide.image}
                                         alt={getLocalizedField(slide, "title")}

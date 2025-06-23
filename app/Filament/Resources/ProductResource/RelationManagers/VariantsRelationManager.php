@@ -78,6 +78,7 @@ class VariantsRelationManager extends RelationManager
                     ->disk('public')
                     ->directory('product-variants')
                     ->visibility('public')
+                    ->optimize('webp')
                     ->imageEditor()
                     ->maxFiles(5),
 
@@ -118,7 +119,7 @@ class VariantsRelationManager extends RelationManager
                     ->label('الكمية')
                     ->sortable()
                     ->badge()
-                    ->color(fn ($record) => $record->quantity > 0 ? 'success' : 'danger'),
+                    ->color(fn($record) => $record->quantity > 0 ? 'success' : 'danger'),
 
                 Tables\Columns\TextColumn::make('color')
                     ->label('اللون')

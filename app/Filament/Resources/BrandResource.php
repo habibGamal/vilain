@@ -58,8 +58,10 @@ class BrandResource extends Resource
                             ->label('الصورة')
                             ->image()
                             ->imageResizeMode('cover')
-                            ->imageResizeTargetWidth('200')
-                            ->imageResizeTargetHeight('200')
+                            ->imageResizeTargetWidth('800')
+                            ->imageResizeTargetHeight('400')
+                            ->optimize('webp')
+                            ->imageEditor()
                             ->directory('brand-images'),
                         Forms\Components\Toggle::make('is_active')
                             ->label('نشط')

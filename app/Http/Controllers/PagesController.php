@@ -54,4 +54,21 @@ class PagesController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Display the contact page.
+     */
+    public function contact(): Response
+    {
+        return Inertia::render('Pages/Contact', [
+            'content' => [
+                'en' => SettingsService::get('contact_page_en'),
+                'ar' => SettingsService::get('contact_page_ar'),
+            ],
+            'title' => [
+                'en' => 'Contact Us',
+                'ar' => 'اتصل بنا',
+            ],
+        ]);
+    }
 }

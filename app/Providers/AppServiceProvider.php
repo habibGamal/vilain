@@ -22,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(BaseImportCsv::class, ImportCsv::class);
+        $this->app->bind(\Filament\Actions\Exports\Jobs\ExportCsv::class, \App\Jobs\ExporterCsv::class);
+
 
         // Bind the PaymentServiceInterface to KashierPaymentService implementation
         $this->app->bind(

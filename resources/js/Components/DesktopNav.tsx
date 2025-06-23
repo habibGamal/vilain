@@ -10,6 +10,7 @@ import {
 } from "@/Components/ui/navigation-menu";
 import { FolderX, ShoppingBag } from "lucide-react";
 import { useI18n } from "@/hooks/use-i18n";
+import { useSettings } from "@/hooks/useSettings";
 import { App } from "@/types";
 import EmptyState from "./ui/empty-state";
 
@@ -20,6 +21,9 @@ interface DesktopNavProps {
 
 export default function DesktopNav({ brands, categories }: DesktopNavProps) {
     const { t, getLocalizedField, direction } = useI18n();
+    const settings = useSettings();
+
+    const showContactPage = settings.show_contact_page !== false;
 
     return (
         <div className="hidden flex-1 lg:flex">
@@ -114,21 +118,23 @@ export default function DesktopNav({ brands, categories }: DesktopNavProps) {
 
                     <NavigationMenuItem>
                         <Link
-                            href="/best-sellers"
+                            href="/sections/4"
                             className={navigationMenuTriggerStyle()}
                         >
                             {t("best_sellers", "Best Sellers")}
                         </Link>
                     </NavigationMenuItem>
 
-                    <NavigationMenuItem>
-                        <Link
-                            href="/contact"
-                            className={navigationMenuTriggerStyle()}
-                        >
-                            {t("contact", "Contact")}
-                        </Link>
-                    </NavigationMenuItem>
+                    {showContactPage && (
+                        <NavigationMenuItem>
+                            <Link
+                                href="/contact"
+                                className={navigationMenuTriggerStyle()}
+                            >
+                                {t("contact", "Contact")}
+                            </Link>
+                        </NavigationMenuItem>
+                    )}
                 </NavigationMenuList>
             </NavigationMenu>
         </div>

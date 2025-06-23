@@ -56,7 +56,11 @@ class HeroSlideResource extends Resource
                             ->label('الصورة')
                             ->image()
                             ->required()
-                            ->imageResizeMode('cover')
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                            ])
+                            ->optimize('webp')
                             ->directory('hero-slides'),
 
                         Forms\Components\TextInput::make('cta_link')
@@ -155,4 +159,4 @@ class HeroSlideResource extends Resource
             'edit' => Pages\EditHeroSlide::route('/{record}/edit'),
         ];
     }
-} 
+}

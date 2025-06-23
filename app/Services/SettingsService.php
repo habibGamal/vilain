@@ -137,6 +137,10 @@ class SettingsService
             'social_links' => self::get('social_links', []),
             'facebook_pixel_url' => self::get('facebook_pixel_url'),
             'facebook_pixel_id' => self::get('facebook_pixel_id'),
+            'show_privacy_policy' => (bool) self::get('show_privacy_policy', true),
+            'show_return_policy' => (bool) self::get('show_return_policy', true),
+            'show_terms_of_service' => (bool) self::get('show_terms_of_service', true),
+            'show_contact_page' => (bool) self::get('show_contact_page', true),
         ];
     }
 

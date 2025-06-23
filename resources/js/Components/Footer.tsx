@@ -2,12 +2,22 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 import { SocialLinks, ContactInfo, SiteLogo } from '@/Components/Settings/SettingsComponents';
 import { useI18n } from '@/hooks/use-i18n';
+import { useSettings } from '@/hooks/useSettings';
 
 export default function Footer() {
     const { t } = useI18n();
+    const settings = useSettings();
+
+    // Get policy page visibility settings
+    const showPrivacyPolicy = settings.show_privacy_policy !== false;
+    const showReturnPolicy = settings.show_return_policy !== false;
+    const showTermsOfService = settings.show_terms_of_service !== false;
+
+    // Check if any policy links should be shown
+    const hasPolicyLinks = showPrivacyPolicy || showReturnPolicy || showTermsOfService;
 
     return (
-        <footer className="bg-muted/50 border-t mt-auto">
+        <footer className="bg-muted/50 border-t mt-auto mb-12 lg:mb-0">
             <div className="container px-4 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Logo & Description */}
@@ -59,17 +69,25 @@ export default function Footer() {
                     <p>
                         © {new Date().getFullYear()} {t('all_rights_reserved', 'All rights reserved')}
                     </p>
-                    <div className="flex gap-4 mt-4 md:mt-0">
-                        <Link href="/privacy" className="hover:text-foreground transition-colors">
-                            {t('privacy_policy', 'Privacy Policy')}
-                        </Link>
-                        <Link href="/returns" className="hover:text-foreground transition-colors">
-                            {t('return_policy', 'Return Policy')}
-                        </Link>
-                        <Link href="/terms" className="hover:text-foreground transition-colors">
-                            {t('terms_of_service', 'Terms of Service')}
-                        </Link>
-                    </div>
+                    {hasPolicyLinks && (
+                        <div className="flex gap-4 mt-4 md:mt-0">
+                            {showPrivacyPolicy && (
+                                <Link href="/privacy" className="hover:text-foreground transition-colors">
+                                    {t('privacy_policy', 'Privacy Policy')}
+                                </Link>
+                            )}
+                            {showReturnPolicy && (
+                                <Link href="/returns" className="hover:text-foreground transition-colors">
+                                    {t('return_policy', 'Return Policy')}
+                                </Link>
+                            )}
+                            {showTermsOfService && (
+                                <Link href="/terms" className="hover:text-foreground transition-colors">
+                                    {t('terms_of_service', 'Terms of Service')}
+                                </Link>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </footer>

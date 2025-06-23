@@ -38,11 +38,12 @@ class Cart extends Model
 
     /**
      * Calculate the total price of all items in the cart.
+     * Uses variant pricing when available, fallback to product pricing.
      */
     public function getTotalPrice(): float
     {
-        return $this->items->sum(function ($item) {
-            return $item->quantity * $item->product->price;
-        });
+        return $this->items->reduce(function ($total, $item) {
+            return $total + $item->getTotalPrice();
+        }, 0);
     }
 }

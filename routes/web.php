@@ -47,6 +47,7 @@ Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->nam
 Route::get('/privacy', [App\Http\Controllers\PagesController::class, 'privacy'])->name('pages.privacy');
 Route::get('/returns', [App\Http\Controllers\PagesController::class, 'returns'])->name('pages.returns');
 Route::get('/terms', [App\Http\Controllers\PagesController::class, 'terms'])->name('pages.terms');
+Route::get('/contact', [App\Http\Controllers\PagesController::class, 'contact'])->name('pages.contact');
 
 Route::get('/notify', function () {
     $subscriptions = User::all();

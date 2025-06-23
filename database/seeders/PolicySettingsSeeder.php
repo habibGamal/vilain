@@ -187,6 +187,110 @@ class PolicySettingsSeeder extends Seeder
                 'is_required' => true,
                 'display_order' => 6,
             ],
+            // Policy page visibility settings
+            [
+                'key' => 'show_privacy_policy',
+                'group' => 'legal',
+                'type' => 'boolean',
+                'value' => '1',
+                'label_en' => 'Show Privacy Policy Link',
+                'label_ar' => 'إظهار رابط سياسة الخصوصية',
+                'description_en' => 'Enable or disable the Privacy Policy link in footer',
+                'description_ar' => 'تفعيل أو إلغاء رابط سياسة الخصوصية في التذييل',
+                'is_required' => false,
+                'display_order' => 7,
+            ],
+            [
+                'key' => 'show_return_policy',
+                'group' => 'legal',
+                'type' => 'boolean',
+                'value' => '1',
+                'label_en' => 'Show Return Policy Link',
+                'label_ar' => 'إظهار رابط سياسة الإرجاع',
+                'description_en' => 'Enable or disable the Return Policy link in footer',
+                'description_ar' => 'تفعيل أو إلغاء رابط سياسة الإرجاع في التذييل',
+                'is_required' => false,
+                'display_order' => 8,
+            ],
+            [
+                'key' => 'show_terms_of_service',
+                'group' => 'legal',
+                'type' => 'boolean',
+                'value' => '1',
+                'label_en' => 'Show Terms of Service Link',
+                'label_ar' => 'إظهار رابط شروط الخدمة',
+                'description_en' => 'Enable or disable the Terms of Service link in footer',
+                'description_ar' => 'تفعيل أو إلغاء رابط شروط الخدمة في التذييل',
+                'is_required' => false,
+                'display_order' => 9,
+            ],
+            // Contact page content settings
+            [
+                'key' => 'contact_page_en',
+                'group' => 'legal',
+                'type' => 'textarea',
+                'value' => '<h2>Contact Us</h2>
+<p>We\'d love to hear from you! Get in touch with us for any questions, concerns, or feedback.</p>
+
+<h3>Get In Touch</h3>
+<p>Feel free to reach out to us through any of the following methods:</p>
+
+<h3>Customer Service</h3>
+<p>Our customer service team is available to help you with orders, returns, and general inquiries.</p>
+
+<h3>Business Hours</h3>
+<p>Monday - Friday: 9:00 AM - 6:00 PM<br>
+Saturday: 10:00 AM - 4:00 PM<br>
+Sunday: Closed</p>
+
+<h3>Response Time</h3>
+<p>We typically respond to all inquiries within 24 hours during business days.</p>',
+                'label_en' => 'Contact Page (English)',
+                'label_ar' => 'صفحة الاتصال (إنجليزي)',
+                'description_en' => 'Contact page content in English',
+                'description_ar' => 'محتوى صفحة الاتصال باللغة الإنجليزية',
+                'is_required' => true,
+                'display_order' => 10,
+            ],
+            [
+                'key' => 'contact_page_ar',
+                'group' => 'legal',
+                'type' => 'textarea',
+                'value' => '<h2>اتصل بنا</h2>
+<p>نحن نحب أن نسمع منك! تواصل معنا لأي أسئلة أو مخاوف أو ملاحظات.</p>
+
+<h3>تواصل معنا</h3>
+<p>لا تتردد في التواصل معنا من خلال أي من الطرق التالية:</p>
+
+<h3>خدمة العملاء</h3>
+<p>فريق خدمة العملاء متاح لمساعدتك في الطلبات والإرجاع والاستفسارات العامة.</p>
+
+<h3>ساعات العمل</h3>
+<p>الاثنين - الجمعة: 9:00 صباحاً - 6:00 مساءً<br>
+السبت: 10:00 صباحاً - 4:00 مساءً<br>
+الأحد: مغلق</p>
+
+<h3>وقت الاستجابة</h3>
+<p>عادة ما نرد على جميع الاستفسارات في غضون 24 ساعة خلال أيام العمل.</p>',
+                'label_en' => 'Contact Page (Arabic)',
+                'label_ar' => 'صفحة الاتصال (عربي)',
+                'description_en' => 'Contact page content in Arabic',
+                'description_ar' => 'محتوى صفحة الاتصال باللغة العربية',
+                'is_required' => true,
+                'display_order' => 11,
+            ],
+            [
+                'key' => 'show_contact_page',
+                'group' => 'legal',
+                'type' => 'boolean',
+                'value' => '1',
+                'label_en' => 'Show Contact Page Link',
+                'label_ar' => 'إظهار رابط صفحة الاتصال',
+                'description_en' => 'Enable or disable the Contact page link in navigation',
+                'description_ar' => 'تفعيل أو إلغاء رابط صفحة الاتصال في التنقل',
+                'is_required' => false,
+                'display_order' => 12,
+            ],
         ];
 
         foreach ($settings as $setting) {

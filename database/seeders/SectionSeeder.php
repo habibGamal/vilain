@@ -41,12 +41,22 @@ class SectionSeeder extends Seeder
             'sort_order' => 3,
             'section_type' => SectionType::VIRTUAL
         ]);
+
+        // Create a best sellers section (VIRTUAL)
+        $bestSellersSection = Section::create([
+            'title_en' => 'Best Sellers',
+            'title_ar' => 'الأكثر مبيعاً',
+            'active' => true,
+            'sort_order' => 4,
+            'section_type' => SectionType::VIRTUAL
+        ]);
+
         // Another REAL section
         $recommendedSection = Section::create([
             'title_en' => 'Recommended For You',
             'title_ar' => 'موصى به لك',
             'active' => true,
-            'sort_order' => 4,
+            'sort_order' => 5,
             'section_type' => SectionType::VIRTUAL
         ]);
     }

@@ -505,8 +505,8 @@ describe('toOrderItems', function () {
         // Verify order item uses product sale price (since variant has no sale price)
         $order->refresh();
         $orderItem = $order->items->first();
-        expect((float) $orderItem->unit_price)->toBe(85.0); // Product sale price
-        expect((float) $orderItem->subtotal)->toBe(170.0); // 85 * 2
+        expect((float) $orderItem->unit_price)->toBe(90.0); // ProductVariant sale price
+        expect((float) $orderItem->subtotal)->toBe(180.0); // 85 * 2
     });
 
     it('uses variant price when no sale prices are available', function () {

@@ -7,9 +7,13 @@ interface SiteConfig {
     site_icon?: string;
     maintenance_mode: boolean;
     contact_email?: string;
-    social_links: Record<string, string>;
+    social_links: string;
     facebook_pixel_url?: string;
     facebook_pixel_id?: string;
+    show_privacy_policy?: boolean;
+    show_return_policy?: boolean;
+    show_terms_of_service?: boolean;
+    show_contact_page?: boolean;
 }
 
 interface PagePropsWithSettings extends PageProps {
@@ -25,7 +29,7 @@ export function useSettings(): SiteConfig {
     return props.settings || {
         site_title: 'Vilain',
         maintenance_mode: false,
-        social_links: {},
+        social_links: "{}",
     };
 }
 

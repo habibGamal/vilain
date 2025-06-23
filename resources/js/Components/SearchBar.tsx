@@ -127,7 +127,7 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
 
           <form onSubmit={handleSearch} className="relative">
             <div className="relative rounded-xl overflow-hidden shadow-md focus-within:shadow-lg transition-shadow duration-300">
-              <div className="absolute ltr:left-4 rtl:right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+              <div className="absolute ltr:left-4 rtl:right-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5">
                 <Search className="h-5 w-5" />
               </div>
               <Input
@@ -142,7 +142,7 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
                   currentLocale === 'ar' ? "pr-12 pl-16" : "pl-12 pr-16"
                 )}
               />
-              <div className="absolute ltr:right-4 rtl:left-4 top-1/2 transform -translate-y-1/2">
+              <div className="absolute ltr:right-4 rtl:left-4 top-1/2 transform -translate-y-1/2 w-fit">
                 {query && (
                   <Button
                     type="button"

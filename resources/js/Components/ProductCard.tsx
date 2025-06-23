@@ -14,9 +14,10 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
     const { getLocalizedField, t } = useI18n();
     const { addToCart, addingToCart } = useCart();
-    const discountPercentage = product.sale_price
+    const hasDiscount = product.sale_price && product.sale_price !== product.price;
+    const discountPercentage = hasDiscount
         ? Math.round(
-              ((product.price - product.sale_price) / product.price) * 100
+              ((product.price - product.sale_price!) / product.price) * 100
           )
         : 0;
     return (
@@ -35,7 +36,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                     {/* Discount Badge */}
-                    {product.sale_price && discountPercentage > 0 && (
+                    {hasDiscount && discountPercentage > 0 && (
                         <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse">
                             -{discountPercentage}%
                         </div>
@@ -67,7 +68,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     {/* Price Section */}
                     <div className="flex items-center justify-between mt-auto pt-3">
                         <div className="flex items-center gap-2">
-                            {product.sale_price ? (
+                            {hasDiscount ? (
                                 <div className="flex flex-col">
                                     <span className="text-xl font-bold text-primary">
                                         {Number(product.sale_price).toFixed(2)} EGP

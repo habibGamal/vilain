@@ -4,6 +4,7 @@ import { Button } from "@/Components/ui/button";
 import { FolderX, Menu, ShoppingBag } from "lucide-react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
 import { useI18n } from "@/hooks/use-i18n";
+import { useSettings } from "@/hooks/useSettings";
 import LanguageSwitcher from "@/Components/LanguageSwitcher";
 import { App } from "@/types";
 import EmptyState from "./ui/empty-state";
@@ -15,7 +16,10 @@ interface MobileNavProps {
 
 export default function MobileNav({ brands, categories }: MobileNavProps) {
     const { direction, t, getLocalizedField } = useI18n();
+    const settings = useSettings();
     const isRtl = direction === "rtl";
+
+    const showContactPage = settings.show_contact_page !== false;
 
     return (
         <Sheet>
@@ -115,17 +119,19 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
 
                         <SheetClose asChild>
                             <Link
-                                href="/best-sellers"
+                                href="/sections/4"
                                 className="text-lg font-medium"
                             >
                                 {t("best_sellers", "Best Sellers")}
                             </Link>
                         </SheetClose>
-                        <SheetClose asChild>
-                            <Link href="/contact" className="text-lg font-medium">
-                                {t("contact", "Contact")}
-                            </Link>
-                        </SheetClose>
+                        {showContactPage && (
+                            <SheetClose asChild>
+                                <Link href="/contact" className="text-lg font-medium">
+                                    {t("contact", "Contact")}
+                                </Link>
+                            </SheetClose>
+                        )}
                     </nav>
                 </div>
             </SheetContent>

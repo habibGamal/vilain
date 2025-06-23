@@ -43,8 +43,8 @@ export default function MainLayout({
     const animationInjection = useRef<HTMLDivElement>(null);
 
     useLayoutEffect(() => {
-        const html = document.querySelector("html") as HTMLHtmlElement;
-        html.setAttribute("dir", "rtl");
+        // const html = document.querySelector("html") as HTMLHtmlElement;
+        // html.setAttribute("dir", "rtl");
 
         const logo = document.querySelector(
             ".loading-container"
@@ -150,10 +150,10 @@ export default function MainLayout({
                 )}
 
                 <main className="container flex-1 px-4 py-4 pb-16 lg:pb-8">
-                    {/* <div
+                    <div
                         ref={animationInjection}
                         className="w-[200px] h-[200px] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
-                    ></div> */}
+                    ></div>
                     <div ref={section} className="">
                         {children}
                     </div>
