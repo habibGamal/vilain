@@ -6,10 +6,10 @@ use Exception;
 
 class InsufficientStockException extends Exception
 {
-    public function __construct(int $requestedQuantity, int $availableQuantity, string $itemName = 'Product')
+    public function __construct(int $requestedQuantity, int $availableQuantity, string $itemName = 'المنتج')
     {
         parent::__construct(
-            "Insufficient stock for {$itemName}. Requested: {$requestedQuantity}, Available: {$availableQuantity}"
+            "مخزون غير كافي لـ {$itemName}. المطلوب: {$requestedQuantity}، المتاح: {$availableQuantity}"
         );
     }
 }

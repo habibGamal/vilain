@@ -31,10 +31,40 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
     }
   }, [isOpen]);
 
-  // Handle clicks outside of the search bar
+  // Handle browser back button and escape key
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (isOpen) {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      // Add a state to history when modal opens
+      window.history.pushState({ searchModalOpen: true }, '');
+      window.addEventListener('popstate', handlePopState);
+      document.addEventListener('keydown', handleEscapeKey);
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isOpen, onClose]);
+
+  // Handle clicks outside of the search content area
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement;
+      // Only close if clicking on the backdrop (not the content area)
+      if (target.classList.contains('search-backdrop')) {
         onClose();
       }
     };
@@ -72,13 +102,16 @@ export default function SearchBar({ isOpen, onClose }: SearchBarProps) {
 
   return (
     <div
-      ref={searchRef}
-      className={`fixed top-0 left-0 w-full h-screen bg-background/95 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 w-full h-screen bg-background/95 z-50 transition-all duration-300 search-backdrop ${
         isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
       }`}
     >
       <div className="container mx-auto pt-20 px-4">
-        <div className="w-full max-w-3xl mx-auto">
+        <div
+          ref={searchRef}
+          className="w-full max-w-3xl mx-auto"
+          onClick={(e) => e.stopPropagation()} // Prevent clicks on content from bubbling up
+        >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">{t('search_products')}</h2>
             <Button

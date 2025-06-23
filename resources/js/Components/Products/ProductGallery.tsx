@@ -26,7 +26,7 @@ export default function ProductGallery({
         return (
             <div className="aspect-square relative bg-muted rounded-md flex items-center justify-center">
                 <Image
-                    src="/placeholder.svg"
+                    src="/placeholder.jpg"
                     alt={getLocalizedField(product, "name")}
                     className="object-contain w-full h-full"
                 />

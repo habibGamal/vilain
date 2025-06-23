@@ -255,5 +255,17 @@
     "invalid_coupon_code": "Invalid coupon code. Please check and try again.",
     "coupon_error": "Failed to apply coupon code. Please try again.",
 
-    "notes_placeholder": "Add any special instructions or notes for your order..."
+    "notes_placeholder": "Add any special instructions or notes for your order...",
+
+    "privacy_policy": "Privacy Policy",
+    "return_policy": "Return Policy",
+    "terms_of_service": "Terms of Service",
+    "all_rights_reserved": "All rights reserved",
+    "quick_links": "Quick Links",
+    "follow_us": "Follow Us",
+    "footer_description": "Your trusted online shopping destination",
+
+    "language_preferences": "Language Preferences",
+    "language_preferences_description": "Choose your preferred language for the interface.",
+    "select_language": "Select Language"
 }

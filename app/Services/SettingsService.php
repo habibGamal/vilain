@@ -117,7 +117,7 @@ class SettingsService
         Cache::forget(self::CACHE_KEY . '_flat');
 
         // Clear group-specific caches
-        $groups = ['general', 'appearance', 'seo', 'social', 'analytics', 'contact', 'email', 'payment'];
+        $groups = ['general', 'appearance', 'seo', 'social', 'analytics', 'contact', 'email', 'payment', 'legal'];
         foreach ($groups as $group) {
             Cache::forget(self::CACHE_KEY . "_{$group}");
         }

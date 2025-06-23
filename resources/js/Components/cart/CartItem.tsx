@@ -30,10 +30,10 @@ export function CartItem({
                     {/* Product Image */}
                     <div className="h-14 w-14 sm:h-24 sm:w-24 rounded-md overflow-hidden bg-muted flex-shrink-0">
                         <Image
-                            src={item.variant?.featured_image || item.product.featured_image || "/placeholder.svg"}
+                            src={item.variant?.featured_image || item.product.featured_image || "/placeholder.jpg"}
                             alt={item.product.name_en}
                             className="h-full w-full object-cover"
-                            fallbackSrc="/placeholder.svg"
+                            fallbackSrc="/placeholder.jpg"
                         />
                     </div>
 

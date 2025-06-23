@@ -48,6 +48,7 @@ class SettingResource extends Resource
                                 'contact' => 'الاتصال',
                                 'email' => 'البريد الإلكتروني',
                                 'payment' => 'الدفع',
+                                'legal' => 'قانوني',
                             ])
                             ->required()
                             ->default('general'),
@@ -162,6 +163,7 @@ class SettingResource extends Resource
                         'social' => 'warning',
                         'analytics' => 'danger',
                         'contact' => 'primary',
+                        'legal' => 'slate',
                         default => 'gray',
                     })
                     ->sortable()
@@ -174,6 +176,7 @@ class SettingResource extends Resource
                         'contact' => 'الاتصال',
                         'email' => 'البريد الإلكتروني',
                         'payment' => 'الدفع',
+                        'legal' => 'قانوني',
                         default => $state,
                     }),
 
@@ -235,6 +238,7 @@ class SettingResource extends Resource
                         'contact' => 'الاتصال',
                         'email' => 'البريد الإلكتروني',
                         'payment' => 'الدفع',
+                        'legal' => 'قانوني',
                     ]),
 
                 Tables\Filters\SelectFilter::make('type')

@@ -26,7 +26,7 @@ export default function ProductGrid({
     sectionId,
     viewType = "scroll", // Default to horizontal scrolling view
 }: ProductGridProps) {
-    const { t ,direction } = useI18n();
+    const { t, direction } = useI18n();
     const page = usePage();
 
     const sectionKey = `section_${sectionId}_page`;
@@ -62,8 +62,10 @@ export default function ProductGrid({
             {(title || viewAllLink) && (
                 <div className="flex items-center justify-between pb-8">
                     {title && (
-                        <div className="flex items-center gap-2">
-                            <PackageOpen className="h-6 w-6 text-primary" />
+                        <div className="flex items-center gap-2 md:gap-4">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary flex items-center justify-center">
+                                <PackageOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                            </div>
                             <h2 className="text-2xl md:text-3xl font-bold">
                                 {t(title)}
                             </h2>
@@ -75,7 +77,7 @@ export default function ProductGrid({
                             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium transition-colors group"
                         >
                             {t("view_all", "View All")}
-                            {direction === 'rtl' ? (
+                            {direction === "rtl" ? (
                                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                             ) : (
                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react";
-import { Sheet, SheetContent, SheetTrigger } from "@/Components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/Components/ui/sheet";
 import { Button } from "@/Components/ui/button";
 import { FolderX, Menu, ShoppingBag } from "lucide-react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
@@ -31,25 +31,22 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
             </SheetTrigger>
             <SheetContent
                 side={isRtl ? "left" : "right"}
-                className="w-[300px] sm:w-[400px]"
+                className="w-[300px]"
             >
-                <div className="flex flex-col gap-6 py-6">
+                <div className="flex flex-col gap-6 py-6 h-full overflow-y-auto">
                     <div className="flex items-center justify-between">
                         <Link href="/" className="flex items-center">
                             <ApplicationLogo className="h-8 w-auto" />
                         </Link>
-                        <div className="flex items-center">
-                            <LanguageSwitcher className="hover:bg-muted hover:text-primary" />
-                            <span className="ml-2 text-sm font-medium">
-                                {t("switch_language", "Switch Language")}
-                            </span>
-                        </div>
+                        <LanguageSwitcher />
                     </div>
 
                     <nav className="flex flex-col space-y-4">
-                        <Link href="/" className="text-lg font-medium">
-                            {t("home", "Home")}
-                        </Link>
+                        <SheetClose asChild>
+                            <Link href="/" className="text-lg font-medium">
+                                {t("home", "Home")}
+                            </Link>
+                        </SheetClose>
 
                         {/* Brands Section */}
                         <div className="space-y-2">
@@ -59,13 +56,14 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
                             {brands && brands.length > 0 ? (
                                 <div className="ltr:ml-4 rtl:mr-4 flex flex-col space-y-2">
                                     {brands.map((brand) => (
-                                        <Link
-                                            key={brand.id}
-                                            href={`/search?brands[]=${brand.id}`}
-                                            className="text-sm hover:text-primary"
-                                        >
-                                            {getLocalizedField(brand, "name")}
-                                        </Link>
+                                        <SheetClose key={brand.id} asChild>
+                                            <Link
+                                                href={`/search?brands[]=${brand.id}`}
+                                                className="text-sm hover:text-primary"
+                                            >
+                                                {getLocalizedField(brand, "name")}
+                                            </Link>
+                                        </SheetClose>
                                     ))}
                                 </div>
                             ) : (
@@ -89,16 +87,17 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
                             {categories && categories.length > 0 ? (
                                 <div className="ltr:ml-4 rtl:mr-4 flex flex-col space-y-2">
                                     {categories.map((category) => (
-                                        <Link
-                                            key={category.id}
-                                            href={`/search?categories[]=${category.id}`}
-                                            className="text-sm hover:text-primary"
-                                        >
-                                            {getLocalizedField(
-                                                category,
-                                                "name"
-                                            )}
-                                        </Link>
+                                        <SheetClose key={category.id} asChild>
+                                            <Link
+                                                href={`/search?categories[]=${category.id}`}
+                                                className="text-sm hover:text-primary"
+                                            >
+                                                {getLocalizedField(
+                                                    category,
+                                                    "name"
+                                                )}
+                                            </Link>
+                                        </SheetClose>
                                     ))}
                                 </div>
                             ) : (
@@ -114,15 +113,19 @@ export default function MobileNav({ brands, categories }: MobileNavProps) {
                             )}
                         </div>
 
-                        <Link
-                            href="/best-sellers"
-                            className="text-lg font-medium"
-                        >
-                            {t("best_sellers", "Best Sellers")}
-                        </Link>
-                        <Link href="/contact" className="text-lg font-medium">
-                            {t("contact", "Contact")}
-                        </Link>
+                        <SheetClose asChild>
+                            <Link
+                                href="/best-sellers"
+                                className="text-lg font-medium"
+                            >
+                                {t("best_sellers", "Best Sellers")}
+                            </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                            <Link href="/contact" className="text-lg font-medium">
+                                {t("contact", "Contact")}
+                            </Link>
+                        </SheetClose>
                     </nav>
                 </div>
             </SheetContent>

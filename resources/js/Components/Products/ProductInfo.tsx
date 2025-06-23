@@ -11,14 +11,25 @@ interface ProductInfoProps {
 export default function ProductInfo({ product }: ProductInfoProps) {
     const { getLocalizedField, t } = useI18n();
     const isInStock = product.isInStock;
+    const discountPercentage = product.sale_price
+        ? Math.round(((product.price - product.sale_price) / product.price) * 100)
+        : 0;
     console.log(product)
     return (
         <div className="flex flex-col">
             {/* Brand */}
             {product.brand && (
-                <Badge variant="outline" className="w-fit mb-3">
-                    {getLocalizedField(product.brand, "name")}
-                </Badge>
+                <Link
+                    href={`/search?brands[]=${product.brand.id}`}
+                    className="w-fit mb-3"
+                >
+                    <Badge 
+                        variant="outline" 
+                        className="hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
+                    >
+                        {getLocalizedField(product.brand, "name")}
+                    </Badge>
+                </Link>
             )}
 
             {/* Product Name */}
@@ -36,14 +47,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                         <span className="text-xl text-muted-foreground line-through">
                             {product.price} EGP
                         </span>
-                        <Badge variant="destructive" className="ml-2">
-                            {Math.round(
-                                ((product.price - product.sale_price) /
-                                    product.price) *
-                                    100
-                            )}
-                            % {t("off", "OFF")}
-                        </Badge>
+                        {discountPercentage > 0 && (
+                            <Badge variant="destructive" className="ml-2">
+                                {discountPercentage}% {t("off", "OFF")}
+                            </Badge>
+                        )}
                     </>
                 ) : (
                     <span className="text-2xl md:text-3xl font-bold">

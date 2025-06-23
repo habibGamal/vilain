@@ -56,6 +56,14 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Get the orders associated with the user.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
      * Get the cart associated with the user.
      */
     public function cart(): HasOne

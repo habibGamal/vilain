@@ -43,6 +43,11 @@ Route::get('/sections/{section}', [SectionController::class, 'show'])->name('sec
 Route::get('/search', [SearchController::class, 'results'])->name('search.results');
 Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
+// Pages routes
+Route::get('/privacy', [App\Http\Controllers\PagesController::class, 'privacy'])->name('pages.privacy');
+Route::get('/returns', [App\Http\Controllers\PagesController::class, 'returns'])->name('pages.returns');
+Route::get('/terms', [App\Http\Controllers\PagesController::class, 'terms'])->name('pages.terms');
+
 Route::get('/notify', function () {
     $subscriptions = User::all();
     Notification::send($subscriptions, new Notify());

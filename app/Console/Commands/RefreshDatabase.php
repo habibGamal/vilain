@@ -29,7 +29,7 @@ class RefreshDatabase extends Command
         $this->call('db:wipe');
         $this->call('migrate');
         $this->call('db:seed');
-        $this->call('app:restore-database-snapshot');
+        // $this->call('app:restore-database-snapshot');
 
     }
 }

@@ -202,8 +202,17 @@ class KashierPaymentController extends Controller
             Log::info('Kashier payment confirmed via webhook', [
                 'paymentRef' => $paymentRef,
                 'paymentId' => $request->input('paymentId'),
-                'amount' => $request->input('amount')
+                'amount' => $request->input('amount'),
+                'request',
+                $request->all()
             ]);
+
+            $order = $this->orderService->getOrderById($request->input('orderId'));
+            // Payment data from Kashier
+            $paymentData = $request->all();
+
+            // Process the successful payment
+            $this->paymentService->processSuccessfulPayment($order, $paymentData);
 
             return response()->json(['status' => 'success']);
 

@@ -64,7 +64,7 @@ class UsagesRelationManager extends RelationManager
 
                 Tables\Columns\TextColumn::make('discount_amount')
                     ->label('قيمة الخصم')
-                    ->money('USD'),
+                    ->money('EGP'),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الاستخدام')

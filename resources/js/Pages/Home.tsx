@@ -35,7 +35,7 @@ export default function Home({
     // Filter active categories and brands
     const activeCategories = categories?.filter((cat) => cat.is_active) || [];
     const activeBrands = brands?.filter((brand) => brand.is_active) || [];
-    console.log(activeCategories);
+    console.log(categories);
 
     return (
         <>

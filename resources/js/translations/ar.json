@@ -290,6 +290,18 @@
   "invalid_coupon_code": "كود الكوبون غير صالح. يرجى التحقق والمحاولة مرة أخرى.",
   "coupon_error": "فشل في تطبيق كود الكوبون. يرجى المحاولة مرة أخرى.",
 
-  "notes_placeholder": "أضف أي تعليمات أو ملاحظات خاصة لطلبك..."
+  "notes_placeholder": "أضف أي تعليمات أو ملاحظات خاصة لطلبك...",
+
+  "privacy_policy": "سياسة الخصوصية",
+  "return_policy": "سياسة الإرجاع",
+  "terms_of_service": "شروط الخدمة",
+  "all_rights_reserved": "جميع الحقوق محفوظة",
+  "quick_links": "روابط سريعة",
+  "follow_us": "تابعنا",
+  "footer_description": "وجهتك المضمونة للتسوق عبر الإنترنت",
+
+  "language_preferences": "تفضيلات اللغة",
+  "language_preferences_description": "اختر لغتك المفضلة لواجهة الموقع.",
+  "select_language": "اختر اللغة"
 
 }

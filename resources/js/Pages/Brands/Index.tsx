@@ -6,7 +6,6 @@ import { Image } from "@/Components/ui/Image";
 import { Award, ShoppingBag } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import EmptyState from "@/Components/ui/empty-state";
-import { cn } from "@/lib/utils";
 import { App } from "@/types";
 
 interface BrandsPageProps {
@@ -15,11 +14,6 @@ interface BrandsPageProps {
 
 export default function Index({ brands }: BrandsPageProps) {
     const { t, getLocalizedField } = useI18n();
-
-    // Function to determine if a brand should be featured (larger size)
-    const isFeatureBrand = (index: number) => {
-        return !(index % 3);
-    };
 
     return (
         <>
@@ -33,79 +27,80 @@ export default function Index({ brands }: BrandsPageProps) {
             </div>
 
             {brands && brands.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 auto-rows-[200px]">
-                    {brands.map((brand, index) => (
-                        <Card
-                            key={brand.id}
-                            className={cn(
-                                "group relative transition-all duration-300 hover:shadow-lg overflow-hidden border-muted/40 hover:border-primary/30",
-                                isFeatureBrand(index) &&
-                                    "sm:col-span-2 sm:row-span-2"
-                            )}
-                        >
-                            <Link
-                                href={`/search?brands[]=${brand.id}`}
-                                className="block h-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    {brands.map((brand, index) => {
+                        // Different background colors for variety
+                        const bgColors = [
+                            'from-teal-400 to-cyan-500',
+                            'from-blue-500 to-blue-600',
+                            'from-sky-400 to-blue-500',
+                            'from-indigo-500 to-purple-600',
+                            'from-cyan-400 to-teal-500',
+                            'from-blue-400 to-indigo-500'
+                        ];
+                        const bgColor = bgColors[index % bgColors.length];
+
+                        return (
+                            <Card
+                                key={brand.id}
+                                className="group relative aspect-[4/3] transition-all duration-300 hover:shadow-xl overflow-hidden border-none rounded-xl"
                             >
-                                <div className="relative h-full bg-background group-hover:bg-muted/10">
-                                    {(brand.display_image || brand.image) ? (
-                                        <div className="relative w-full h-full">
-                                            <Image
-                                                src={resolveStoragePath(brand.display_image || brand.image) || ''}
-                                                alt={getLocalizedField(
-                                                    brand,
-                                                    "name"
-                                                )}
-                                                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                                                sizes={
-                                                    isFeatureBrand(index)
-                                                        ? "(max-width: 640px) 100vw, 50vw"
-                                                        : "(max-width: 640px) 50vw, 25vw"
-                                                }
-                                                fallback={
-                                                    <div className="w-full h-full flex items-center justify-center bg-muted/5 text-muted-foreground">
-                                                        <span className="text-sm font-medium">
-                                                            {getLocalizedField(
-                                                                brand,
-                                                                "name"
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                }
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                        </div>
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-muted/5 text-muted-foreground group-hover:bg-muted/10 transition-colors duration-300">
-                                            <span className="text-sm font-medium">
-                                                {getLocalizedField(
-                                                    brand,
-                                                    "name"
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                                        <div className="flex items-center gap-2">
-                                            <p
-                                                className={cn(
-                                                    "font-medium line-clamp-1",
-                                                    isFeatureBrand(index)
-                                                        ? "text-lg"
-                                                        : "text-sm"
-                                                )}
-                                            >
-                                                {getLocalizedField(
-                                                    brand,
-                                                    "name"
-                                                )}
-                                            </p>
+                                <Link
+                                    href={`/search?brands[]=${brand.id}`}
+                                    className="block h-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-xl"
+                                >
+                                    <div className={`relative h-full bg-gradient-to-br ${bgColor}`}>
+                                        {(brand.display_image || brand.image) ? (
+                                            <div className="relative w-full h-full">
+                                                <Image
+                                                    src={resolveStoragePath(brand.display_image || brand.image) || ''}
+                                                    alt={getLocalizedField(
+                                                        brand,
+                                                        "name"
+                                                    )}
+                                                    className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105 rounded-xl"
+                                                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, 25vw"
+                                                    fallback={
+                                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${bgColor} rounded-xl`}>
+                                                            <span className="text-sm font-medium text-white">
+                                                                {getLocalizedField(
+                                                                    brand,
+                                                                    "name"
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                />
+                                                {/* Gradient overlay from transparent to dark at bottom */}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-xl"></div>
+                                            </div>
+                                        ) : (
+                                            <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${bgColor} text-white rounded-xl`}>
+                                                <span className="text-sm font-medium">
+                                                    {getLocalizedField(
+                                                        brand,
+                                                        "name"
+                                                    )}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {/* Text overlay at bottom left */}
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                                            <div className="space-y-1">
+                                                <h3 className="font-bold text-sm leading-tight uppercase tracking-wide">
+                                                    {getLocalizedField(
+                                                        brand,
+                                                        "name"
+                                                    )}
+                                                </h3>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
-                        </Card>
-                    ))}
+                                </Link>
+                            </Card>
+                        );
+                    })}
                 </div>
             ) : (
                 <EmptyState

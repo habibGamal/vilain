@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from '@inertiajs/react';
 import { SocialLinks, ContactInfo, SiteLogo } from '@/Components/Settings/SettingsComponents';
 import { useI18n } from '@/hooks/use-i18n';
 
@@ -59,12 +60,15 @@ export default function Footer() {
                         © {new Date().getFullYear()} {t('all_rights_reserved', 'All rights reserved')}
                     </p>
                     <div className="flex gap-4 mt-4 md:mt-0">
-                        <a href="/privacy" className="hover:text-foreground transition-colors">
+                        <Link href="/privacy" className="hover:text-foreground transition-colors">
                             {t('privacy_policy', 'Privacy Policy')}
-                        </a>
-                        <a href="/terms" className="hover:text-foreground transition-colors">
+                        </Link>
+                        <Link href="/returns" className="hover:text-foreground transition-colors">
+                            {t('return_policy', 'Return Policy')}
+                        </Link>
+                        <Link href="/terms" className="hover:text-foreground transition-colors">
                             {t('terms_of_service', 'Terms of Service')}
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

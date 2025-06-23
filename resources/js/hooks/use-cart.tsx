@@ -36,9 +36,36 @@ export default function useCart() {
             // Refresh to update cart state in the navbar/header
             // Alternative: use a global state manager to update the cart badge only
             router.reload({ only: ["cart_summary"] });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error adding product to cart:", error);
-            // Show error toast or notification here if needed
+
+            // Handle authentication error - redirect to login
+            if (error.response?.status === 401) {
+                toast({
+                    title: t("login_required", "Login Required"),
+                    description: t(
+                        "login_to_add_to_cart",
+                        "Please login to add items to cart"
+                    ),
+                    variant: "destructive",
+                });
+                router.visit(route("login"));
+                return;
+            }
+
+            // Handle other errors
+            const errorMessage =
+                error.response?.data?.message ||
+                error.message ||
+                t(
+                    "failed_to_add_to_cart",
+                    "Failed to add item to cart. Please try again."
+                );
+            toast({
+                title: t("error", "Error"),
+                description: errorMessage,
+                variant: "destructive",
+            });
         } finally {
             setAddingToCart((prev) => ({ ...prev, [productId]: false }));
         }
@@ -53,9 +80,36 @@ export default function useCart() {
         try {
             await axios.patch(route("cart.update", id), { quantity });
             router.reload();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating cart item:", error);
-            // Show error toast or notification here if needed
+
+            // Handle authentication error
+            if (error.response?.status === 401) {
+                toast({
+                    title: t("login_required", "Login Required"),
+                    description: t(
+                        "login_to_continue",
+                        "Please login to continue"
+                    ),
+                    variant: "destructive",
+                });
+                router.visit(route("login"));
+                return;
+            }
+
+            // Handle other errors
+            const errorMessage =
+                error.response?.data?.message ||
+                error.message ||
+                t(
+                    "failed_to_update_cart",
+                    "Failed to update cart item. Please try again."
+                );
+            toast({
+                title: t("error", "Error"),
+                description: errorMessage,
+                variant: "destructive",
+            });
         } finally {
             setIsLoading((prev) => ({ ...prev, [id]: false }));
         }
@@ -70,9 +124,36 @@ export default function useCart() {
         try {
             await axios.delete(route("cart.remove", id));
             router.reload();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error removing cart item:", error);
-            // Show error toast or notification here if needed
+
+            // Handle authentication error
+            if (error.response?.status === 401) {
+                toast({
+                    title: t("login_required", "Login Required"),
+                    description: t(
+                        "login_to_continue",
+                        "Please login to continue"
+                    ),
+                    variant: "destructive",
+                });
+                router.visit(route("login"));
+                return;
+            }
+
+            // Handle other errors
+            const errorMessage =
+                error.response?.data?.message ||
+                error.message ||
+                t(
+                    "failed_to_remove_from_cart",
+                    "Failed to remove item from cart. Please try again."
+                );
+            toast({
+                title: t("error", "Error"),
+                description: errorMessage,
+                variant: "destructive",
+            });
         } finally {
             setIsLoading((prev) => ({ ...prev, [id]: false }));
         }
@@ -85,9 +166,36 @@ export default function useCart() {
         try {
             await axios.delete(route("cart.clear"));
             router.reload();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error clearing cart:", error);
-            // Show error toast or notification here if needed
+
+            // Handle authentication error
+            if (error.response?.status === 401) {
+                toast({
+                    title: t("login_required", "Login Required"),
+                    description: t(
+                        "login_to_continue",
+                        "Please login to continue"
+                    ),
+                    variant: "destructive",
+                });
+                router.visit(route("login"));
+                return;
+            }
+
+            // Handle other errors
+            const errorMessage =
+                error.response?.data?.message ||
+                error.message ||
+                t(
+                    "failed_to_clear_cart",
+                    "Failed to clear cart. Please try again."
+                );
+            toast({
+                title: t("error", "Error"),
+                description: errorMessage,
+                variant: "destructive",
+            });
         }
     };
 

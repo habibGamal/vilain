@@ -91,9 +91,9 @@ export default function HeroCarousel({ heroSlides }: HeroCarouselProps) {
                                 </div>
                             </div>
 
-                            {/* Desktop Layout */}
+                            {/* Desktop and Tablet Layout */}
                             <div className="hidden md:block">
-                                <div className="relative aspect-[21/9] overflow-hidden rounded-xl">
+                                <div className="relative aspect-[21/9] md:aspect-[16/9] lg:aspect-[21/9] overflow-hidden rounded-xl">
                                     <Image
                                         src={slide.image}
                                         alt={getLocalizedField(slide, "title")}
@@ -111,18 +111,18 @@ export default function HeroCarousel({ heroSlides }: HeroCarouselProps) {
                                         }
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/10" />
-                                    <div className="absolute inset-0 flex items-center">
-                                        <div className="grid place-items-center w-full mt-48 max-w-screen-xl mx-auto px-6 space-y-4 text-white ltr:force-ltr rtl:force-rtl">
-                                            <h1 className="text-4xl lg:text-5xl font-bold">
+                                    <div className="absolute inset-0 top-[30%] flex items-center justify-center">
+                                        <div className="text-center max-w-screen-xl mx-auto px-4 md:px-6 lg:px-8 space-y-3 md:space-y-4 lg:space-y-6 text-white ltr:force-ltr rtl:force-rtl">
+                                            <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight">
                                                 {getLocalizedField(slide, "title")}
                                             </h1>
-                                            <p className="md:text-lg max-w-2xl">
+                                            <p className="text-sm md:text-base lg:text-lg max-w-xl md:max-w-2xl mx-auto leading-relaxed">
                                                 {getLocalizedField(slide, "description")}
                                             </p>
-                                            <div className="pt-4">
+                                            <div className="pt-2 md:pt-4">
                                                 <Button
                                                     size="lg"
-                                                    className="font-medium"
+                                                    className="font-medium text-sm md:text-base"
                                                     asChild
                                                 >
                                                     <Link href={slide.cta_link}>

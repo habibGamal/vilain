@@ -18,13 +18,18 @@ import MobileNav from "@/Components/MobileNav";
 import UserActions from "@/Components/UserActions";
 import { MaintenanceWrapper } from "@/Components/Settings/SettingsComponents";
 import { App } from "@/types";
+import LogoAnimation from "@/Components/LogoAnimation";
 
 export default function MainLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { auth, categories, brands ,cartInfo: cart} =
-        usePage<App.Interfaces.AppPageProps>().props;
+    const {
+        auth,
+        categories,
+        brands,
+        cartInfo: cart,
+    } = usePage<App.Interfaces.AppPageProps>().props;
     const { direction, t, getLocalizedField } = useI18n();
     const user = auth?.user;
 
@@ -35,7 +40,22 @@ export default function MainLayout({
     };
 
     const section = useRef<HTMLDivElement>(null);
+    const animationInjection = useRef<HTMLDivElement>(null);
+
     useLayoutEffect(() => {
+        const html = document.querySelector("html") as HTMLHtmlElement;
+        html.setAttribute("dir", "rtl");
+
+        const logo = document.querySelector(
+            ".loading-container"
+        ) as HTMLElement;
+        logo.classList.add("disabled");
+    }, []);
+
+    useLayoutEffect(() => {
+        const existingAnimation = document.getElementById(
+            "section-logo-animation"
+        );
         router.on("start", (e) => {
             if (
                 e.detail.visit.method !== "get" ||
@@ -45,6 +65,11 @@ export default function MainLayout({
                 return;
             section.current?.classList.remove("section-loaded");
             section.current?.classList.add("section-go-away");
+            if (animationInjection.current && existingAnimation) {
+                animationInjection.current.appendChild(existingAnimation);
+                animationInjection.current.classList.remove("hidden");
+                animationInjection.current.classList.add("block");
+            }
         });
         router.on("finish", (e) => {
             if (
@@ -54,6 +79,11 @@ export default function MainLayout({
                 return;
             section.current?.classList.remove("section-go-away");
             section.current?.classList.add("section-loaded");
+            if (animationInjection.current && existingAnimation) {
+                animationInjection.current.removeChild(existingAnimation);
+                animationInjection.current.classList.remove("block");
+                animationInjection.current.classList.add("hidden");
+            }
         });
         window.addEventListener("popstate", () => {
             setTimeout(
@@ -113,11 +143,17 @@ export default function MainLayout({
                 {/* Main Content */}
                 {header && (
                     <header className="bg-white shadow">
-                        <div className="container mx-auto px-4 py-6">{header}</div>
+                        <div className="container mx-auto px-4 py-6">
+                            {header}
+                        </div>
                     </header>
                 )}
 
                 <main className="container flex-1 px-4 py-4 pb-16 lg:pb-8">
+                    {/* <div
+                        ref={animationInjection}
+                        className="w-[200px] h-[200px] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
+                    ></div> */}
                     <div ref={section} className="">
                         {children}
                     </div>

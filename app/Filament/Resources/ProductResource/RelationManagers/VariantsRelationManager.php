@@ -106,12 +106,12 @@ class VariantsRelationManager extends RelationManager
 
                 Tables\Columns\TextColumn::make('price')
                     ->label('السعر')
-                    ->money('USD')
+                    ->money('EGP')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('sale_price')
                     ->label('سعر العرض')
-                    ->money('USD')
+                    ->money('EGP')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('quantity')

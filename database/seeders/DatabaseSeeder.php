@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AnnouncementSeeder::class,
             HeroSlideSeeder::class,
             SettingsSeeder::class,
+            PolicySettingsSeeder::class,
         ]);
     }
 }

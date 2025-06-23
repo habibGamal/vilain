@@ -4,7 +4,7 @@ import ProductDescription from "@/Components/Products/ProductDescription";
 import ProductGallery from "@/Components/Products/ProductGallery";
 import ProductInfo from "@/Components/Products/ProductInfo";
 import ProductQuantitySelector from "@/Components/Products/ProductQuantitySelector";
-import ProductTabs from "@/Components/Products/ProductTabs";
+
 import ProductVariantSelector from "@/Components/Products/ProductVariantSelector";
 import { PageTitle } from "@/Components/ui/page-title";
 import { useI18n } from "@/hooks/use-i18n";
@@ -78,12 +78,10 @@ export default function Show({ product }: ShowProps) {
                     </div>
                 </div>
             </div>
-            {/* Tabs section */}
-            <ProductTabs product={product} />
 
             {/* Related products */}
             <ProductGrid
-                sectionId="related"
+                sectionId="related_products"
                 title="related_products"
                 emptyMessage={t(
                     "no_related_products",

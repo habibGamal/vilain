@@ -25,7 +25,8 @@ export default {
     	extend: {
     		fontFamily: {
     			sans: [
-    				'Figtree',
+    				// 'Figtree',
+                    'Inter',
                     ...defaultTheme.fontFamily.sans
                 ]
     		},
@@ -93,6 +94,19 @@ export default {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
     			sm: 'calc(var(--radius) - 4px)'
+    		},
+    		animation: {
+    			'gradient-x': 'gradient-x 3s ease infinite',
+    		},
+    		keyframes: {
+    			'gradient-x': {
+    				'0%, 100%': {
+    					'background-position': '0% 50%'
+    				},
+    				'50%': {
+    					'background-position': '100% 50%'
+    				}
+    			}
     		}
     	}
     },

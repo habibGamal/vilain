@@ -11,7 +11,7 @@ export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'o
 const Image = React.forwardRef<HTMLImageElement, ImageProps>(
   ({ className, src, alt = '', fallback, fallbackSrc, onError, useDefaultFallback = true, ...props }, ref) => {
     const [error, setError] = useState<boolean>(false);
-    const defaultFallbackSrc = '/placeholder.svg';
+    const defaultFallbackSrc = '/placeholder.jpg';
 
     const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
       setError(true);

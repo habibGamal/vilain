@@ -23,9 +23,9 @@ export default function DesktopNav({ brands, categories }: DesktopNavProps) {
 
     return (
         <div className="hidden flex-1 lg:flex">
-            <NavigationMenu>
+            <NavigationMenu dir={direction}>
                 <NavigationMenuList dir={direction}>
-                    <NavigationMenuItem>
+                    <NavigationMenuItem className="rtl:mx-1">
                         <Link href="/" className={navigationMenuTriggerStyle()}>
                             {t("home", "Home")}
                         </Link>
