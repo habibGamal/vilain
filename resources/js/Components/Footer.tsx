@@ -12,9 +12,10 @@ export default function Footer() {
     const showPrivacyPolicy = settings.show_privacy_policy !== false;
     const showReturnPolicy = settings.show_return_policy !== false;
     const showTermsOfService = settings.show_terms_of_service !== false;
+    const showFacebookDataDeletion = settings.show_facebook_data_deletion !== false;
 
     // Check if any policy links should be shown
-    const hasPolicyLinks = showPrivacyPolicy || showReturnPolicy || showTermsOfService;
+    const hasPolicyLinks = showPrivacyPolicy || showReturnPolicy || showTermsOfService || showFacebookDataDeletion;
 
     return (
         <footer className="bg-muted/50 border-t mt-auto mb-12 lg:mb-0">
@@ -84,6 +85,11 @@ export default function Footer() {
                             {showTermsOfService && (
                                 <Link href="/terms" className="hover:text-foreground transition-colors">
                                     {t('terms_of_service', 'Terms of Service')}
+                                </Link>
+                            )}
+                            {showFacebookDataDeletion && (
+                                <Link href="/facebook-data-deletion" className="hover:text-foreground transition-colors">
+                                    {t('facebook_data_deletion', 'Facebook Data Deletion')}
                                 </Link>
                             )}
                         </div>

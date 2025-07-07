@@ -51,20 +51,22 @@ export default function Login({
                 {/* Social login section first */}
                 <div className="grid grid-cols-2 gap-4">
                     <Button
-                        style={{ backgroundColor: '#1877F3', color: '#fff' }}
-                        onClick={() => router.get(route('social.login', { provider: 'facebook' }))}
-                        className="flex items-center justify-center hover:brightness-90 focus:ring-2 focus:ring-blue-500"
+                        asChild
+                        className="flex items-center justify-center gap-2 w-full bg-[#1877F3] text-white hover:bg-[#166fe0] focus:ring-2 focus:ring-blue-500"
                     >
-                        <Facebook className="mr-2 h-4 w-4" />
-                        Facebook
+                        <a href={route('social.login', { provider: 'facebook' })}>
+                            <Facebook className="h-4 w-4" />
+                            Facebook
+                        </a>
                     </Button>
                     <Button
-                        style={{ backgroundColor: '#DB4437', color: '#fff' }}
-                        onClick={() => router.get(route('social.login', { provider: 'google' }))}
-                        className="flex items-center justify-center hover:bg-blue-50 focus:ring-2 focus:ring-blue-500"
+                        asChild
+                        className="flex items-center justify-center gap-2 w-full bg-[#DB4437] text-white hover:bg-[#c23321] focus:ring-2 focus:ring-red-500"
                     >
-                        <Chrome className="mr-2 h-4 w-4" />
-                        Google
+                        <a href={route('social.login', { provider: 'google' })}>
+                            <Chrome className="h-4 w-4" />
+                            Google
+                        </a>
                     </Button>
                 </div>
 

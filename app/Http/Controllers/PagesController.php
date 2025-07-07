@@ -71,4 +71,12 @@ class PagesController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Display the Facebook data deletion instructions page.
+     */
+    public function facebookDataDeletion(): Response
+    {
+        return Inertia::render('Pages/FacebookDataDeletion');
+    }
 }

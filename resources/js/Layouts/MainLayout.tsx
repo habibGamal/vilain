@@ -151,7 +151,7 @@ export default function MainLayout({
                 <main className="container flex-1 px-4 py-4 pb-16 lg:pb-8">
                     <div
                         ref={animationInjection}
-                        className="w-[200px] h-[200px] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
+                        className="hidden w-[200px] h-[200px] fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
                     ></div>
                     <div ref={section} className="">
                         {children}
