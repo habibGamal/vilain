@@ -1,4 +1,8 @@
 {
+  "welcome_message": "مرحبًا بكم في متجرنا",
+  "shop_now": "تسوق الآن",
+  "special_offers": "عروض خاصة",
+  "new_arrivals": "وصل حديثًا",
   "confirm_password": "تأكيد كلمة المرور",
   "secure_area_confirmation": "هذه منطقة آمنة من التطبيق. يرجى تأكيد كلمة المرور الخاصة بك قبل المتابعة.",
   "password": "كلمة المرور",
@@ -302,6 +306,7 @@
 
   "language_preferences": "تفضيلات اللغة",
   "language_preferences_description": "اختر لغتك المفضلة لواجهة الموقع.",
-  "select_language": "اختر اللغة"
+  "select_language": "اختر اللغة",
+  "or_continue_with": "أو المتابعة باستخدام"
 
 }

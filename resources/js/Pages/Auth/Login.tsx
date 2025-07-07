@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 import MainLayout from '@/Layouts/MainLayout';
 import { Button } from '@/Components/ui/button';
@@ -7,6 +7,7 @@ import { Checkbox } from '@/Components/ui/checkbox';
 import { Label } from '@/Components/ui/label';
 import { useI18n } from '@/hooks/use-i18n';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
+import { Facebook, Chrome } from 'lucide-react';
 
 export default function Login({
     status,
@@ -47,6 +48,37 @@ export default function Login({
                     </Alert>
                 )}
 
+                {/* Social login section first */}
+                <div className="grid grid-cols-2 gap-4">
+                    <Button
+                        style={{ backgroundColor: '#1877F3', color: '#fff' }}
+                        onClick={() => router.get(route('social.login', { provider: 'facebook' }))}
+                        className="flex items-center justify-center hover:brightness-90 focus:ring-2 focus:ring-blue-500"
+                    >
+                        <Facebook className="mr-2 h-4 w-4" />
+                        Facebook
+                    </Button>
+                    <Button
+                        style={{ backgroundColor: '#DB4437', color: '#fff' }}
+                        onClick={() => router.get(route('social.login', { provider: 'google' }))}
+                        className="flex items-center justify-center hover:bg-blue-50 focus:ring-2 focus:ring-blue-500"
+                    >
+                        <Chrome className="mr-2 h-4 w-4" />
+                        Google
+                    </Button>
+                </div>
+
+                <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-muted"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                            {t('or_continue_with', 'Or continue with')}
+                        </span>
+                    </div>
+                </div>
+                {/* Login form below social login */}
                 <form onSubmit={submit} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="email">{t('email', 'Email')}</Label>

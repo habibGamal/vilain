@@ -5,6 +5,7 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { useI18n } from '@/hooks/use-i18n';
+import { Facebook, Chrome } from 'lucide-react';
 
 export default function Register() {
     const { t } = useI18n();
@@ -106,6 +107,36 @@ export default function Register() {
                     >
                         {t('register', 'Register')}
                     </Button>
+                    
+                    <div className="relative my-4">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-muted"></div>
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                                {t('or_continue_with', 'Or continue with')}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => window.location.href = route('social.login', { provider: 'facebook' })}
+                            className="flex items-center justify-center"
+                        >
+                            <Facebook className="mr-2 h-4 w-4" />
+                            Facebook
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => window.location.href = route('social.login', { provider: 'google' })}
+                            className="flex items-center justify-center"
+                        >
+                            <Chrome className="mr-2 h-4 w-4" />
+                            Google
+                        </Button>
+                    </div>
 
                     <div className="text-center text-sm">
                         <span className="text-muted-foreground">

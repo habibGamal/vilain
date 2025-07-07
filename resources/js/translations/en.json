@@ -1,4 +1,8 @@
 {
+    "welcome_message": "Welcome to our store",
+    "shop_now": "Shop Now",
+    "special_offers": "Special Offers",
+    "new_arrivals": "New Arrivals",
     "confirm_password": "Confirm Password",
     "secure_area_confirmation": "This is a secure area of the application. Please confirm your password before continuing.",
     "password": "Password",
@@ -267,5 +271,6 @@
 
     "language_preferences": "Language Preferences",
     "language_preferences_description": "Choose your preferred language for the interface.",
-    "select_language": "Select Language"
+    "select_language": "Select Language",
+    "or_continue_with": "Or continue with"
 }

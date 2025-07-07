@@ -15,7 +15,7 @@ class Product extends Model
     /**
      * TNTSearch configuration.
      */
-    public $asYouType = true;
+    // public $asYouType = true;
 
     /**
      * The attributes that are mass assignable.
@@ -61,10 +61,12 @@ class Product extends Model
      */
     public function toSearchableArray()
     {
+        $this->load(['brand', 'category']);
+
         $array = [
             'id' => $this->id,
             'name_en' => $this->name_en,
-            'name_ar' => $this->name_ar,
+            'name_ar' => $this->normalizeArabic($this->name_ar),
             'description_en' => $this->description_en,
             'description_ar' => $this->description_ar,
             'slug' => $this->slug,
@@ -75,6 +77,27 @@ class Product extends Model
         ];
 
         return $array;
+    }
+
+    /**
+     * Normalize Arabic letters for search consistency.
+     *
+     * @param string|null $text
+     * @return string|null
+     */
+    protected function normalizeArabic($text)
+    {
+        if (!$text) return $text;
+        $text = trim($text);
+        $text = mb_strtolower($text, 'UTF-8');
+        // Normalize common Arabic letter variations
+        $search = [
+            'أ', 'إ', 'آ', 'ى', 'ئ', 'ؤ', 'ة', 'ٱ', 'ء',
+        ];
+        $replace = [
+            'ا', 'ا', 'ا', 'ي', 'ي', 'و', 'ه', 'ا', '',
+        ];
+        return str_replace($search, $replace, $text);
     }
 
     /**

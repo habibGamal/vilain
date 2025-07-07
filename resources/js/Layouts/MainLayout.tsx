@@ -80,7 +80,6 @@ export default function MainLayout({
             section.current?.classList.remove("section-go-away");
             section.current?.classList.add("section-loaded");
             if (animationInjection.current && existingAnimation) {
-                animationInjection.current.removeChild(existingAnimation);
                 animationInjection.current.classList.remove("block");
                 animationInjection.current.classList.add("hidden");
             }
