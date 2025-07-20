@@ -27,6 +27,7 @@ class User extends Authenticatable implements FilamentUser
         'facebook_id',
         'google_id',
         'avatar',
+        'is_admin',
     ];
 
     /**
@@ -54,8 +55,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        /* TODO: Please implement your own logic here. */
-        return true; // str_ends_with($this->email, '@larament.test');
+        return $this->is_admin;
     }
 
     /**

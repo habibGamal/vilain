@@ -98,23 +98,6 @@ export default function FacebookDataDeletion() {
                             </CardContent>
                         </Card>
 
-                        {/* Additional Content */}
-                        {/* {localizedContent && (
-                            <Card className="border-0 bg-white/70 shadow-lg backdrop-blur-sm dark:bg-slate-800/70">
-                                <CardContent className="p-8">
-                                    <div
-                                        className="prose prose-lg max-w-none text-slate-700 dark:prose-invert dark:text-slate-300"
-                                        style={{
-                                            lineHeight: '1.8',
-                                            fontSize: '1.1rem'
-                                        }}
-                                    >
-                                        <div className="space-y-6" dangerouslySetInnerHTML={{ __html: localizedContent }} />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )} */}
-
                         {/* Last Updated Notice */}
                         <div className="text-center">
                             <p className="text-sm text-slate-500 dark:text-slate-400">
