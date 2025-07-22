@@ -94,7 +94,7 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
                                             )}
                                             <div className="mt-1.5 flex items-center text-sm text-muted-foreground">
                                                 <span>
-                                                    $
+                                                    EGP
                                                     {Number(
                                                         item.unit_price
                                                     ).toFixed(2)}{" "}
@@ -116,7 +116,7 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
                                             </div>
                                         </div>
                                         <p className="text-right font-medium text-lg">
-                                            $
+                                            EGP
                                             {(
                                                 item.unit_price *
                                                 item.quantity

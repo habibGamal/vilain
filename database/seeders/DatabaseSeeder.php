@@ -16,12 +16,12 @@ class DatabaseSeeder extends Seeder
             GovSeeder::class,
             AreaSeeder::class,
             ShippingCostSeeder::class,
-            UserSeeder::class,
             SectionSeeder::class,
             AnnouncementSeeder::class,
             HeroSlideSeeder::class,
             SettingsSeeder::class,
             PolicySettingsSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

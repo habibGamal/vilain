@@ -72,7 +72,7 @@ export default function Show({ order, canRequestReturn = false }: OrderShowProps
                 )
             )
         ) {
-            router.post(
+            router.patch(
                 route("orders.cancel", order.id),
                 {},
                 {

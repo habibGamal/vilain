@@ -92,7 +92,7 @@ export function CartItem({
                                         {/* Show variant price if available, otherwise product price */}
                                         {(item.variant?.sale_price || item.product.sale_price) && (
                                             <span className="text-primary font-medium text-sm">
-                                                $
+                                                EGP
                                                 {Number(
                                                     item.variant?.sale_price || item.product.sale_price
                                                 ).toFixed(2)}
@@ -105,7 +105,7 @@ export function CartItem({
                                                     : "text-primary font-medium text-sm"
                                             }
                                         >
-                                            $
+                                            EGP
                                             {Number(item.variant?.price || item.product.price).toFixed(
                                                 2
                                             )}
@@ -178,7 +178,7 @@ export function CartItem({
                                 <div className="flex flex-col">
                                     {(item.variant?.sale_price || item.product.sale_price) && (
                                         <span className="text-primary font-medium">
-                                            $
+                                            EGP
                                             {Number(
                                                 item.variant?.sale_price || item.product.sale_price
                                             ).toFixed(2)}
