@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AreaResource\Pages;
+use App\Filament\Resources\AreaResource\RelationManagers;
 use App\Models\Area;
 use App\Models\Gov;
 use Filament\Forms;
@@ -99,9 +100,8 @@ class AreaResource extends Resource
                     ->label('عدد العناوين')
                     ->counts('addresses')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('shipping_costs_count')
-                    ->label('عدد تكاليف الشحن')
-                    ->counts('shippingCosts')
+                Tables\Columns\TextColumn::make('shippingCost.value')
+                    ->label('تكاليف الشحن')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإنشاء')
@@ -138,7 +138,7 @@ class AreaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ShippingCostsRelationManager::class,
         ];
     }
 
