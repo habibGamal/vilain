@@ -36,14 +36,14 @@ class VariantsRelationManager extends RelationManager
                 Forms\Components\TextInput::make('price')
                     ->label('السعر')
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('ج.م'),
 
                 Forms\Components\TextInput::make('sale_price')
                     ->label('سعر العرض')
                     ->numeric()
                     ->nullable()
                     ->lte('price')
-                    ->prefix('$'),
+                    ->prefix('ج.م'),
 
                 Forms\Components\TextInput::make('quantity')
                     ->label('الكمية')

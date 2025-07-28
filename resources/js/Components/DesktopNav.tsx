@@ -13,6 +13,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { useSettings } from "@/hooks/useSettings";
 import { App } from "@/types";
 import EmptyState from "./ui/empty-state";
+import { Image } from "./ui/Image";
 
 interface DesktopNavProps {
     brands: App.Models.Brand[];
@@ -48,8 +49,16 @@ export default function DesktopNav({ brands, categories }: DesktopNavProps) {
                                             <NavigationMenuLink asChild>
                                                 <Link
                                                     href={`/search?brands[]=${brand.id}`}
-                                                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                                                    className="flex items-center gap-2 select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                                                 >
+                                                    <Image
+                                                        src={brand.image_url}
+                                                        alt={getLocalizedField(
+                                                            brand,
+                                                            "name"
+                                                        )}
+                                                        className="rounded-md w-[30px] h-[30px] object-contain object-center"
+                                                    />
                                                     <div className="text-sm font-medium leading-none">
                                                         {getLocalizedField(
                                                             brand,

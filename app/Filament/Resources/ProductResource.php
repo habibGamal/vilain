@@ -87,18 +87,18 @@ class ProductResource extends Resource
                                     ->label('السعر')
                                     ->required()
                                     ->numeric()
-                                    ->prefix('$'),
+                                    ->prefix('ج.م'),
                                 Forms\Components\TextInput::make('sale_price')
                                     ->label('سعر العرض')
                                     ->numeric()
                                     ->nullable()
                                     ->lte('price')
-                                    ->prefix('$'),
+                                    ->prefix('ج.م'),
                                 Forms\Components\TextInput::make('cost_price')
                                     ->label('سعر التكلفة')
                                     ->numeric()
                                     ->nullable()
-                                    ->prefix('$'),
+                                    ->prefix('ج.م'),
                             ]),
                     ])
                     ->columnSpanFull()

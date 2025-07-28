@@ -30,12 +30,12 @@ class DirectPromotionSeeder extends Seeder
 
         // Free shipping promotion
         DirectPromotion::create([
-            'name_ar' => 'شحن مجاني للطلبات أكثر من 100 دولار',
-            'name_en' => 'Free Shipping on Orders Over $100',
-            'description_ar' => 'احصل على شحن مجاني عند الطلب بقيمة 100 دولار أو أكثر',
-            'description_en' => 'Get free shipping when you order $100 or more',
+            'name_ar' => 'شحن مجاني للطلبات أكثر من 1500 جنيه',
+            'name_en' => 'Free Shipping on Orders Over 1500 EGP',
+            'description_ar' => 'احصل على شحن مجاني عند الطلب بقيمة 1500 جنيه أو أكثر',
+            'description_en' => 'Get free shipping when you order 1500 EGP or more',
             'type' => 'free_shipping',
-            'minimum_order_amount' => 100.00,
+            'minimum_order_amount' => 1500.00,
             'is_active' => true,
             'starts_at' => now(),
         ]);

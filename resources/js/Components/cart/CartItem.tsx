@@ -163,7 +163,7 @@ export function CartItem({
                                     {t("total", "Total")}
                                 </div>
                                 <div className="font-semibold text-sm">
-                                    ${calculateItemTotal(item)}
+                                    EGP {calculateItemTotal(item)}
                                 </div>
                             </div>
                         </div>
@@ -191,7 +191,7 @@ export function CartItem({
                                                 : "text-primary font-medium"
                                         }
                                     >
-                                        ${Number(item.variant?.price || item.product.price).toFixed(2)}
+                                        EGP {Number(item.variant?.price || item.product.price).toFixed(2)}
                                     </span>
                                 </div>
                             </div>
@@ -245,7 +245,7 @@ export function CartItem({
                                     {t("total", "Total")}
                                 </div>
                                 <div className="font-semibold">
-                                    ${calculateItemTotal(item)}
+                                    EGP {calculateItemTotal(item)}
                                 </div>
                             </div>
                         </div>

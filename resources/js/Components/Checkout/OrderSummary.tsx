@@ -13,6 +13,7 @@ import { App } from "@/types";
 import { CircleCheck, Percent, ShoppingBag, Tag, Truck } from "lucide-react";
 import { Control, UseFormWatch } from "react-hook-form";
 import { CouponSection } from "./CouponSection";
+import { formatCurrencyLocalized } from "@/utils/currencyUtils";
 
 interface OrderSummaryProps {
     cartSummary: {
@@ -54,7 +55,7 @@ export function OrderSummary({
     couponError,
     onCouponCodeInput,
 }: OrderSummaryProps) {
-    const { t } = useI18n();
+    const { t, currentLocale } = useI18n();
 
     return (
         <Card className="sticky top-4">
@@ -74,7 +75,7 @@ export function OrderSummary({
                         <span className="text-muted-foreground">
                             {t("subtotal", "Subtotal")}
                         </span>
-                        <span>{subtotal.toFixed(2)}</span>
+                        <span>{formatCurrencyLocalized(subtotal, currentLocale)}</span>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -86,7 +87,7 @@ export function OrderSummary({
                         </div>
                         <span>
                             {selectedAddressId
-                                ? shippingCost.toFixed(2)
+                                ? formatCurrencyLocalized(shippingCost, currentLocale)
                                 : t("select_address", "Select address")}
                         </span>
                     </div>
@@ -115,7 +116,9 @@ export function OrderSummary({
                                 </div>
                             </div>
                             <span className="text-lg font-semibold text-green-600 dark:text-green-400">
-                                -{discount.toFixed(2)}
+                                                            <span className="text-destructive">
+                                -{formatCurrencyLocalized(discount, currentLocale)}
+                            </span>
                             </span>
                         </div>
                     )}
@@ -125,8 +128,8 @@ export function OrderSummary({
                             <span>{t("total", "Total")}</span>
                             <span className="text-lg">
                                 {selectedAddressId
-                                    ? total.toFixed(2)
-                                    : subtotal.toFixed(2)}
+                                    ? formatCurrencyLocalized(total, currentLocale)
+                                    : formatCurrencyLocalized(subtotal, currentLocale)}
                             </span>
                         </div>
                     </div>

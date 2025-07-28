@@ -15,8 +15,8 @@ class AnnouncementSeeder extends Seeder
     {
         // Create demo announcements
         Announcement::create([
-            'title_en' => 'Free shipping on all orders over $50',
-            'title_ar' => 'شحن مجاني على جميع الطلبات التي تزيد عن 50 دولار',
+            'title_en' => 'Free shipping on all orders over 750 EGP',
+            'title_ar' => 'شحن مجاني على جميع الطلبات التي تزيد عن 750 جنيه',
             'is_active' => true,
             'display_order' => 1,
         ]);
@@ -35,4 +35,4 @@ class AnnouncementSeeder extends Seeder
             'display_order' => 3,
         ]);
     }
-} 
+}

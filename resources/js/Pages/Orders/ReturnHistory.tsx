@@ -128,7 +128,7 @@ export default function ReturnHistory({ returnHistory }: ReturnHistoryProps) {
                           {t("total_amount", "Total Amount")}
                         </p>
                         <p className="text-sm">
-                          ${Number(returnItem.total).toFixed(2)}
+                          EGP {Number(returnItem.total).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -175,7 +175,7 @@ export default function ReturnHistory({ returnHistory }: ReturnHistoryProps) {
                                 {t("quantity", "Qty")}: {item.quantity}
                               </div>
                               <div className="text-sm font-medium">
-                                ${Number(item.price).toFixed(2)}
+                                EGP {Number(item.price).toFixed(2)}
                               </div>
                             </div>
                           </div>

@@ -146,7 +146,7 @@ export default function Index() {
                                             {t("total", "Total")}
                                         </p>
                                         <p className="text-sm">
-                                            ${Number(order.total).toFixed(2)}
+                                            EGP {Number(order.total).toFixed(2)}
                                         </p>
                                     </div>
                                     <div className="space-y-1">

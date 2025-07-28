@@ -62,7 +62,7 @@ class PromotionResource extends Resource
                                 Forms\Components\TextInput::make('value')
                                     ->label('القيمة')
                                     ->numeric()
-                                    ->prefix(fn (Forms\Get $get) => $get('type') === PromotionType::PERCENTAGE->value ? '%' : '$')
+                                    ->prefix(fn (Forms\Get $get) => $get('type') === PromotionType::PERCENTAGE->value ? '%' : 'ج.م')
                                     ->visible(fn (Forms\Get $get) =>
                                         in_array($get('type'), [
                                             PromotionType::PERCENTAGE->value,
@@ -79,7 +79,7 @@ class PromotionResource extends Resource
                                     ->label('الحد الأدنى لقيمة الطلب')
                                     ->helperText('اتركه فارغًا إذا لم يكن هناك حد أدنى')
                                     ->numeric()
-                                    ->prefix('$')
+                                    ->prefix('ج.م')
                                     ->nullable(),
                                 Forms\Components\TextInput::make('usage_limit')
                                     ->label('الحد الأقصى للاستخدام')

@@ -9,6 +9,7 @@ import {
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
 import { useI18n } from "@/hooks/use-i18n";
+import { formatCurrencyLocalized } from "@/utils/currencyUtils";
 import { App } from "@/types";
 import { AlertTriangle, CircleCheck, Gift, Percent, Tag, X } from "lucide-react";
 import { Control } from "react-hook-form";
@@ -34,7 +35,7 @@ export function CouponSection({
     couponError,
     onCouponCodeInput,
 }: CouponSectionProps) {
-    const { t, getLocalizedField } = useI18n();
+    const { t, getLocalizedField, currentLocale } = useI18n();
 
     return (
         <div className="pt-4 border-t">
@@ -143,7 +144,7 @@ export function CouponSection({
                                             >
                                                 <Percent className="h-3 w-3 ltr:mr-1 rtl:ml-1" />
                                                 {t("saving", "Saving")}{" "}
-                                                {discount.toFixed(2)}
+                                                {formatCurrencyLocalized(discount, currentLocale)}
                                             </Badge>
                                         </div>
                                         {appliedPromotion.description_en && (

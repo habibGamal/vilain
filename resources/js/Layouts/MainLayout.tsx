@@ -108,7 +108,7 @@ export default function MainLayout({
                         {/* Logo */}
                         <div className="flex items-center ltr:mr-4 rtl:ml-4">
                             <Link href="/">
-                                <ApplicationLogo className="h-8 w-auto" />
+                                <ApplicationLogo className="h-8 w-auto  rounded-xl" />
                             </Link>
                         </div>
 

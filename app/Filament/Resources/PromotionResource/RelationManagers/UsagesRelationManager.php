@@ -43,7 +43,7 @@ class UsagesRelationManager extends RelationManager
                 Forms\Components\TextInput::make('discount_amount')
                     ->label('قيمة الخصم')
                     ->numeric()
-                    ->prefix('$')
+                    ->prefix('ج.م')
                     ->required()
                     ->disabled(),
             ]);

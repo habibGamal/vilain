@@ -116,19 +116,19 @@ class OrderResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('subtotal')
                             ->label('المجموع الفرعي')
-                            ->prefix('$')
+                            ->prefix('ج.م')
                             ->disabled(),
                         Forms\Components\TextInput::make('shipping_cost')
                             ->label('الشحن')
-                            ->prefix('$')
+                            ->prefix('ج.م')
                             ->disabled(),
                         Forms\Components\TextInput::make('discount')
                             ->label('الخصم')
-                            ->prefix('$')
+                            ->prefix('ج.م')
                             ->disabled(),
                         Forms\Components\TextInput::make('total')
                             ->label('الإجمالي')
-                            ->prefix('$')
+                            ->prefix('ج.م')
                             ->disabled(),
                         Forms\Components\TextInput::make('coupon_code')
                             ->label('كوبون')
@@ -217,16 +217,16 @@ class OrderResource extends Resource
                     ->schema([
                         TextEntry::make('subtotal')
                             ->label('المجموع الفرعي')
-                            ->money(),
+                            ->money('EGP'),
                         TextEntry::make('shipping_cost')
                             ->label('الشحن')
-                            ->money(),
+                            ->money('EGP'),
                         TextEntry::make('discount')
                             ->label('الخصم')
-                            ->money(),
+                            ->money('EGP'),
                         TextEntry::make('total')
                             ->label('الإجمالي')
-                            ->money()
+                            ->money('EGP')
                             ->weight('bold'),
                         TextEntry::make('coupon_code')
                             ->label('كوبون')
@@ -277,7 +277,7 @@ class OrderResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('total')
                     ->label('الإجمالي')
-                    ->money()
+                    ->money('EGP')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('return_status')
                     ->label('حالة الإرجاع')

@@ -14,26 +14,28 @@ export function OrderSummary({ order }: OrderSummaryProps) {
         <CardFooter className="pt-6 bg-muted/20">
             <dl className="space-y-4 text-sm w-full">
                 <div className="flex justify-between items-center">
-                    <dt className="text-muted-foreground">
+                                        <span className="text-muted-foreground">
                         {t("subtotal", "Subtotal")}
-                    </dt>
-                    <dd className="font-medium">
-                        ${Number(order.subtotal).toFixed(2)}
-                    </dd>
+                    </span>
+                    <span>
+                        EGP {Number(order.subtotal).toFixed(2)}
+                    </span>
                 </div>
                 <div className="flex justify-between items-center">
-                    <dt className="text-muted-foreground">
+                                        <span className="text-muted-foreground">
                         {t("shipping", "Shipping")}
-                    </dt>
-                    <dd className="font-medium">
-                        ${Number(order.shipping_cost).toFixed(2)}
-                    </dd>
+                    </span>
+                    <span>
+                        EGP {Number(order.shipping_cost).toFixed(2)}
+                    </span>
                 </div>
                 {Number(order.discount) > 0 && (
                     <div className="flex justify-between items-center text-green-600">
                         <dt>{t("discount", "Discount")}</dt>
                         <dd className="font-medium">
-                            -${Number(order.discount).toFixed(2)}
+                                                    <span className="text-destructive">
+                            -EGP {Number(order.discount).toFixed(2)}
+                        </span>
                         </dd>
                     </div>
                 )}
@@ -41,7 +43,7 @@ export function OrderSummary({ order }: OrderSummaryProps) {
                 <div className="flex justify-between items-center font-medium text-xl">
                     <dt>{t("total", "Total")}</dt>
                     <dd className="text-primary">
-                        ${Number(order.total).toFixed(2)}
+                        EGP {Number(order.total).toFixed(2)}
                     </dd>
                 </div>
             </dl>

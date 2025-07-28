@@ -61,12 +61,12 @@ class OrderItemsRelationManager extends RelationManager
 
                 Forms\Components\TextInput::make('unit_price')
                     ->label('سعر الوحدة')
-                    ->prefix('$')
+                    ->prefix('ج.م')
                     ->disabled(),
 
                 Forms\Components\TextInput::make('subtotal')
                     ->label('المجموع الفرعي')
-                    ->prefix('$')
+                    ->prefix('ج.م')
                     ->disabled(),
             ])->columns(2);
     }
@@ -113,12 +113,12 @@ class OrderItemsRelationManager extends RelationManager
 
                 Tables\Columns\TextColumn::make('unit_price')
                     ->label('سعر الوحدة')
-                    ->money()
+                    ->money('EGP')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('subtotal')
                     ->label('المجموع الفرعي')
-                    ->money()
+                    ->money('EGP')
                     ->sortable(),
             ])
             ->filters([
