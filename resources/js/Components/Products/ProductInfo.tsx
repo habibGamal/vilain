@@ -6,16 +6,25 @@ import { App } from "@/types";
 
 interface ProductInfoProps {
     product: App.Models.Product;
+    selectedVariant?: App.Models.ProductVariant;
 }
 
-export default function ProductInfo({ product }: ProductInfoProps) {
+export default function ProductInfo({ product, selectedVariant }: ProductInfoProps) {
     const { getLocalizedField, t } = useI18n();
-    const isInStock = product.isInStock;
-    const hasDiscount = product.sale_price && product.sale_price !== product.price;
+
+    // Use variant pricing if available, otherwise fall back to product pricing
+    const currentPrice = selectedVariant?.price ?? product.price;
+    const currentSalePrice = selectedVariant?.sale_price ?? product.sale_price;
+
+    // Check stock availability - use variant stock if variant is selected
+    const isInStock = selectedVariant
+        ? selectedVariant.quantity > 0
+        : product.isInStock;
+
+    const hasDiscount = currentSalePrice && currentSalePrice !== currentPrice;
     const discountPercentage = hasDiscount
-        ? Math.round(((product.price - product.sale_price!) / product.price) * 100)
+        ? Math.round(((currentPrice - currentSalePrice!) / currentPrice) * 100)
         : 0;
-    console.log(product)
     return (
         <div className="flex flex-col">
             {/* Brand */}
@@ -43,10 +52,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 {hasDiscount ? (
                     <>
                         <span className="text-2xl md:text-3xl font-bold">
-                            {product.sale_price} EGP
+                            {currentSalePrice} EGP
                         </span>
                         <span className="text-xl text-muted-foreground line-through">
-                            {product.price} EGP
+                            {currentPrice} EGP
                         </span>
                         {discountPercentage > 0 && (
                             <Badge variant="destructive" className="ml-2">
@@ -56,7 +65,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     </>
                 ) : (
                     <span className="text-2xl md:text-3xl font-bold">
-                        {product.price} EGP
+                        {currentPrice} EGP
                     </span>
                 )}
             </div>
@@ -89,7 +98,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                         <span className="font-medium">
                             {isInStock
                                 ? `${t("in_stock", "In Stock")} · ${
-                                      product.totalQuantity
+                                      selectedVariant
+                                        ? selectedVariant.quantity
+                                        : product.totalQuantity
                                   } ${t("available", "available")}`
                                 : t("out_of_stock", "Out of Stock")}
                         </span>

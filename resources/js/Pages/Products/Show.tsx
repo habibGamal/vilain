@@ -11,7 +11,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import { App } from "@/types";
 import { Head, Link } from "@inertiajs/react";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ShowProps {
     product: App.Models.Product;
@@ -21,9 +21,24 @@ interface ShowProps {
 export default function Show({ product }: ShowProps) {
     const { t, getLocalizedField } = useI18n();
     const [quantity, setQuantity] = useState(1);
-    const [selectedVariant, setSelectedVariant] = useState<App.Models.ProductVariant | null>(null);
 
-    // Get the default variant or the first variant if no default
+    // Initialize with first variant if variants exist
+    const getDefaultVariant = () => {
+        if (!product.variants || product.variants.length === 0) return null;
+        // Try to find default variant first, otherwise use first variant
+        return product.variants.find(v => v.is_default) || product.variants[0];
+    };
+
+    const [selectedVariant, setSelectedVariant] = useState<App.Models.ProductVariant | null>(getDefaultVariant());
+
+    // Ensure the ProductVariantSelector knows about the initial selection
+    useEffect(() => {
+        const defaultVariant = getDefaultVariant();
+        if (defaultVariant && !selectedVariant) {
+            setSelectedVariant(defaultVariant);
+        }
+    }, [product.variants]);
+
     const handleVariantChange = (variant: App.Models.ProductVariant) => {
         console.log("Selected variant:", variant);
         setSelectedVariant(variant);
@@ -46,7 +61,7 @@ export default function Show({ product }: ShowProps) {
 
                 {/* Right column - Product details */}
                 <div className="flex flex-col">
-                    <ProductInfo product={product} />
+                    <ProductInfo product={product} selectedVariant={selectedVariant || undefined} />
 
                     {/* Variant selector */}
                     {product.variants && product.variants.length > 0 && (

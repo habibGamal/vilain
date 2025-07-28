@@ -16,19 +16,23 @@ class OrderEvaluationService
 {
     protected CartService $cartService;
     protected PromotionService $promotionService;
+    protected DirectPromotionService $directPromotionService;
 
     /**
      * Create a new service instance.
      *
      * @param CartService $cartService
      * @param PromotionService $promotionService
+     * @param DirectPromotionService $directPromotionService
      */
     public function __construct(
         CartService $cartService,
-        PromotionService $promotionService
+        PromotionService $promotionService,
+        DirectPromotionService $directPromotionService
     ) {
         $this->cartService = $cartService;
         $this->promotionService = $promotionService;
+        $this->directPromotionService = $directPromotionService;
     }
 
     /**
@@ -76,6 +80,12 @@ class OrderEvaluationService
 
         // Apply shipping discount if applicable
         $finalShippingCost = $shippingDiscount ? 0 : $shippingCost->value;
+
+        // Check for direct promotion free shipping
+        if (!$shippingDiscount && $this->directPromotionService->qualifiesForFreeShipping($subtotal)) {
+            $finalShippingCost = 0;
+            $shippingDiscount = true;
+        }
 
         // Calculate the final total
         $total = $subtotal + $finalShippingCost - $discount;

@@ -203,7 +203,9 @@ export default function useCart() {
      * Calculate the total price of a cart item
      */
     const calculateItemTotal = (item: App.Models.CartItem) => {
-        const price = item.product.sale_price || item.product.price;
+        const priceVariant = item.variant?.sale_price || item.variant?.price;
+        const priceProduct = item.product.sale_price || item.product.price;
+        const price = priceVariant || priceProduct;
         return (price * item.quantity).toFixed(2);
     };
 
