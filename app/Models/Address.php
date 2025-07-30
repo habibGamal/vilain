@@ -18,6 +18,7 @@ class Address extends Model
      */
     protected $fillable = [
         'content',
+        'phone',
         'area_id',
         'user_id',
     ];

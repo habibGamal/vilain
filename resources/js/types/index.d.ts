@@ -239,6 +239,7 @@ declare namespace App.Models {
     export interface Address {
         id: number;
         content: string;
+        phone?: string;
         area_id: number;
         user_id: number;
         area?: Area;

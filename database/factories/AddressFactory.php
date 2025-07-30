@@ -28,6 +28,7 @@ class AddressFactory extends Factory
     {
         return [
             'content' => fake()->streetAddress(),
+            'phone' => fake()->phoneNumber(),
             'area_id' => Area::factory(),
             'user_id' => User::factory(),
         ];

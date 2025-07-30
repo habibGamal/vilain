@@ -21,6 +21,7 @@ class AddressController extends Controller
         $validator = Validator::make($request->all(), [
             'area_id' => 'required|exists:areas,id',
             'content' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -32,6 +33,7 @@ class AddressController extends Controller
         $address = new Address();
         $address->area_id = $request->area_id;
         $address->content = $request->content;
+        $address->phone = $request->phone;
         $address->user_id = Auth::id();
         $address->save();
 

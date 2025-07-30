@@ -31,6 +31,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { Textarea } from "./ui/textarea";
 
 interface AddressModalProps {
     trigger: React.ReactNode;
@@ -41,6 +42,7 @@ interface AddressModalProps {
 const formSchema = z.object({
     area_id: z.string().min(1, "Area is required"),
     content: z.string().min(3, "Address content must be at least 3 characters"),
+    phone: z.string().min(1, "Phone number is required").max(20, "Phone number must be at most 20 characters"),
 });
 
 export default function AddressModal({
@@ -59,6 +61,7 @@ export default function AddressModal({
         defaultValues: {
             area_id: "",
             content: "",
+            phone: "",
         },
     });
     // Fetch areas when modal opens if we don't have any
@@ -82,6 +85,7 @@ export default function AddressModal({
             const response = await axios.post(route("addresses.store"), {
                 area_id: parseInt(values.area_id),
                 content: values.content,
+                phone: values.phone,
             });
 
             onAddressCreated(response.data.address);
@@ -110,10 +114,9 @@ export default function AddressModal({
                     fetchAreas();
                 }
             }}
-
         >
             <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]" >
+            <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader dir="rtl">
                     <DialogTitle>
                         {t("add_new_address", "Add New Address")}
@@ -189,6 +192,28 @@ export default function AddressModal({
                         />
                         <FormField
                             control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>
+                                        {t("phone_number", "Phone Number")}
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder={t(
+                                                "phone_placeholder",
+                                                "Enter phone number..."
+                                            )}
+                                            {...field}
+                                            disabled={isSubmitting}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
                             name="content"
                             render={({ field }) => (
                                 <FormItem>
@@ -199,7 +224,7 @@ export default function AddressModal({
                                         )}
                                     </FormLabel>
                                     <FormControl>
-                                        <Input
+                                        <Textarea
                                             placeholder={t(
                                                 "address_placeholder",
                                                 "Building, street, landmark..."

@@ -107,6 +107,9 @@ class OrderResource extends Resource
                         Forms\Components\TextInput::make('shippingAddress.content')
                             ->label('عنوان الشحن')
                             ->disabled(),
+                        Forms\Components\TextInput::make('shippingAddress.phone')
+                            ->label('رقم الهاتف')
+                            ->disabled(),
                         Forms\Components\TextInput::make('shippingAddress.area.name_en')
                             ->label('المنطقة')
                             ->disabled(),
@@ -209,6 +212,9 @@ class OrderResource extends Resource
                             ->label('البريد الإلكتروني'),
                         TextEntry::make('shippingAddress.content')
                             ->label('عنوان الشحن'),
+                        TextEntry::make('shippingAddress.phone')
+                            ->label('رقم الهاتف')
+                            ->placeholder('-'),
                         TextEntry::make('shippingAddress.area.name_en')
                             ->label('المنطقة'),
                     ])->columns(2),

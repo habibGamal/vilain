@@ -1,4 +1,7 @@
 {
+    "phone": "Phone",
+    "phone_number": "Phone Number",
+    "phone_placeholder": "Enter phone number",
     "welcome_message": "Welcome to our store",
     "shop_now": "Shop Now",
     "special_offers": "Special Offers",

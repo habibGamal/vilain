@@ -97,6 +97,11 @@ export function ShippingAddressSection({
                                                         <div className="text-sm text-muted-foreground">
                                                             {address.content}
                                                         </div>
+                                                        {address.phone && (
+                                                            <div className="text-sm text-muted-foreground">
+                                                                {t("phone", "Phone")}: {address.phone}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </Label>
                                             </div>
