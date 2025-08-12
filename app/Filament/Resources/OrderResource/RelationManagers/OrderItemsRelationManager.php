@@ -79,6 +79,10 @@ class OrderItemsRelationManager extends RelationManager
                     ->label('المعرّف')
                     ->sortable(),
 
+                Tables\Columns\ImageColumn::make('variant.images.0')
+                    ->height(100)
+                    ->label('صورة المنتج'),
+
                 Tables\Columns\TextColumn::make('product.name_en')
                     ->label('اسم المنتج')
                     ->searchable()

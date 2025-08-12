@@ -14,6 +14,7 @@ use App\Models\Address;
 use App\Models\ShippingCost;
 use App\Models\Promotion;
 use App\Services\InventoryManagementService;
+use App\Services\AdminNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,6 +28,7 @@ class OrderService
     protected CartService $cartService;
     protected OrderEvaluationService $orderEvaluationService;
     protected InventoryManagementService $inventoryService;
+    protected AdminNotificationService $adminNotificationService;
 
     /**
      * Create a new service instance.
@@ -34,15 +36,18 @@ class OrderService
      * @param CartService $cartService
      * @param OrderEvaluationService $orderEvaluationService
      * @param InventoryManagementService $inventoryService
+     * @param AdminNotificationService $adminNotificationService
      */
     public function __construct(
         CartService $cartService,
         OrderEvaluationService $orderEvaluationService,
-        InventoryManagementService $inventoryService
+        InventoryManagementService $inventoryService,
+        AdminNotificationService $adminNotificationService
     ) {
         $this->cartService = $cartService;
         $this->orderEvaluationService = $orderEvaluationService;
         $this->inventoryService = $inventoryService;
+        $this->adminNotificationService = $adminNotificationService;
     }
 
     /**
@@ -86,6 +91,9 @@ class OrderService
 
             // Clear the cart after successful order creation
             $this->cartService->clearCart();
+
+            // Send notification to admin about the new order
+            $this->adminNotificationService->sendOrderPlacedNotification($order);
 
             // Return the created order with all its related items
             return $order->load('items.product', 'items.variant', 'shippingAddress');

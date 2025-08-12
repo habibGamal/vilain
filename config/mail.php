@@ -113,4 +113,16 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Email Address
+    |--------------------------------------------------------------------------
+    |
+    | This email address will be used to send admin notifications such as
+    | new orders, return requests, and other important system events.
+    |
+    */
+
+    'admin_email' => env('MAIL_TO_ADMIN'),
+
 ];

@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\RefundService;
 use App\Services\InventoryManagementService;
+use App\Services\AdminNotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,19 +22,23 @@ class OrderReturnService
 {
     protected RefundService $refundService;
     protected InventoryManagementService $inventoryService;
+    protected AdminNotificationService $adminNotificationService;
 
     /**
      * Create a new service instance.
      *
      * @param RefundService $refundService
      * @param InventoryManagementService $inventoryService
+     * @param AdminNotificationService $adminNotificationService
      */
     public function __construct(
         RefundService $refundService,
-        InventoryManagementService $inventoryService
+        InventoryManagementService $inventoryService,
+        AdminNotificationService $adminNotificationService
     ) {
         $this->refundService = $refundService;
         $this->inventoryService = $inventoryService;
+        $this->adminNotificationService = $adminNotificationService;
     }
 
     /**
@@ -96,6 +101,9 @@ class OrderReturnService
                 'user_id' => $order->user_id,
                 'reason' => $reason,
             ]);
+
+            // Send notification to admin about the return request
+            $this->adminNotificationService->sendOrderReturnRequestNotification($order);
 
             return $order->fresh();
         });
